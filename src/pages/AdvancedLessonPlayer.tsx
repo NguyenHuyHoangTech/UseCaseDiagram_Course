@@ -1,9 +1,11 @@
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
-import { X, Zap, CheckCircle2, AlertCircle, RotateCcw, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { X, Zap, Sparkles, CheckCircle2, AlertCircle, RotateCcw, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
+import { Link } from 'react-router-dom';
 import Mascot from '../components/Mascot';
-
+import LessonBottomBar from '../components/LessonBottomBar';
+import InteractiveMap from '../components/InteractiveMap';
 
 
 const LESSON_DATA = [
@@ -61,18 +63,22 @@ const LESSON_DATA = [
     id: 4,
     phase: 'learning',
     type: 'interactive',
-    interactionType: 'click_connect',
+    interactionType: 'map_interaction',
     title: 'Thiết lập Liên kết (Association)',
-    question: 'Chạm 1 điểm bên trái và 1 điểm bên phải để nối các Actor với Use Case hợp lý.',
-    leftNodes: [
-      { id: 'a1', label: 'Khách hàng' },
-      { id: 'a2', label: 'Quản trị viên' }
+    question: 'Vẽ đường nối (Association) để gán quyền tương tác từ Khách hàng đến "Xem lịch sử mua hàng" và Quản trị viên đến "Xóa tài khoản".',
+    initialNodes: [
+      { id: 'b1', type: 'boundary', x: 280, y: 40, w: 400, h: 440, data: { label: 'Hệ thống' } },
+      { id: 'a1', type: 'actor', x: 60, y: 120, w: 80, h: 120, data: { label: 'Khách hàng', isPrimary: true } },
+      { id: 'a2', type: 'actor', x: 60, y: 320, w: 80, h: 120, data: { label: 'Quản trị viên', isPrimary: true } },
+      { id: 'u1', type: 'useCase', x: 360, y: 140, w: 200, h: 80, data: { label: 'Xem lịch sử mua hàng' } },
+      { id: 'u2', type: 'useCase', x: 360, y: 320, w: 200, h: 80, data: { label: 'Xóa tài khoản người dùng' } }
     ],
-    rightNodes: [
-      { id: 'u1', label: 'Xóa tài khoản người dùng' },
-      { id: 'u2', label: 'Xem lịch sử mua hàng' }
-    ],
-    correctPairs: [{ from: 'a1', to: 'u2' }, { from: 'a2', to: 'u1' }],
+    initialEdges: [],
+    correctCondition: (nodes, edges) => {
+      const hasA1U1 = edges.some(e => e.source === 'a1' && e.target === 'u1' && e.type === 'association');
+      const hasA2U2 = edges.some(e => e.source === 'a2' && e.target === 'u2' && e.type === 'association');
+      return hasA1U1 && hasA2U2;
+    },
     explanation: [{ text: "Đường Association (liên kết cơ bản) thể hiện việc Actor đó có quyền kích hoạt hoặc tham gia vào Use Case tương ứng.", img: null }]
   },
   {
@@ -82,6 +88,19 @@ const LESSON_DATA = [
     interactionType: 'slider_exploratory', 
     title: 'Simulating Exceptional Flows (<<extend>>)',
     question: 'Kéo thanh tải trọng server. Quan sát khi nào chức năng ngoại lệ được kích hoạt.',
+    normalNodes: [
+      { id: 'b1', type: 'boundary', x: 280, y: 40, w: 400, h: 300, data: { label: 'Hệ thống' } },
+      { id: 'u1', type: 'useCase', x: 360, y: 200, w: 160, h: 80, data: { label: 'Checkout' } }
+    ],
+    overloadNodes: [
+      { id: 'b1', type: 'boundary', x: 280, y: 40, w: 400, h: 300, data: { label: 'Hệ thống' } },
+      { id: 'u1', type: 'useCase', x: 360, y: 200, w: 160, h: 80, data: { label: 'Checkout' } },
+      { id: 'u2', type: 'useCase', x: 360, y: 100, w: 160, h: 60, data: { label: 'Show Error' } }
+    ],
+    normalEdges: [],
+    overloadEdges: [
+      { id: 'e1', source: 'u2', target: 'u1', type: 'extend' }
+    ],
     explanation: [{ text: "<<extend>> relationships được sử dụng cho các luồng rẽ nhánh, lỗi, hoặc hành vi tùy chọn chỉ xảy ra trong điều kiện cụ thể (như server bị quá tải).", img: null }]
   },
   {
@@ -103,49 +122,54 @@ const LESSON_DATA = [
     id: 7,
     phase: 'learning',
     type: 'interactive',
-    interactionType: 'block_mapping', 
+    interactionType: 'map_interaction', 
     title: 'Biên dịch Sơ đồ thành Kiến trúc',
-    question: 'Lắp ráp các khối để hoàn thiện luồng tương tác.',
-    options: [
-      { id: 'b1', label: 'Khách hàng' },
-      { id: 'b2', label: '— Association —' },
-      { id: 'b3', label: 'Duyệt Catalog' }
+    question: 'Hãy vẽ một đường nối Association từ Khách hàng đến chức năng Duyệt Catalog.',
+    initialNodes: [
+      { id: 'b1', type: 'boundary', x: 280, y: 40, w: 400, h: 300, data: { label: 'Hệ thống' } },
+      { id: 'a1', type: 'actor', x: 60, y: 120, w: 80, h: 120, data: { label: 'Khách hàng', isPrimary: true } },
+      { id: 'u1', type: 'useCase', x: 360, y: 140, w: 160, h: 80, data: { label: 'Duyệt Catalog' } }
     ],
-    correctSequence: ['b1', 'b2', 'b3'],
+    initialEdges: [],
+    correctCondition: (nodes, edges) => {
+      return edges.some(e => e.source === 'a1' && e.target === 'u1' && e.type === 'association');
+    },
     explanation: [{ text: "Actor giao tiếp trực tiếp với Use Case thông qua một đường Association đơn giản không có mũi tên.", img: null }]
   },
   {
     id: 8,
     phase: 'learning',
     type: 'interactive',
-    interactionType: 'map_runner',
+    interactionType: 'map_interaction',
     title: 'Mô phỏng Luồng chạy (Sandbox)',
-    question: 'Chọn thành phần để tạo luồng. Nhấn Kiểm tra để "Run" thử sơ đồ của bạn!',
-    options: {
-      step1: [{id: 'act1', label: 'User', type: 'actor'}],
-      step2: [
-        {id: 'rel1', label: 'Association', type: 'association'},
-        {id: 'rel2', label: '<<include>>', type: 'include'}
-      ],
-      step3: [{id: 'uc1', label: 'Login', type: 'usecase'}]
+    question: 'Hãy tạo luồng đúng giữa User và Login.',
+    initialNodes: [
+      { id: 'b1', type: 'boundary', x: 280, y: 40, w: 400, h: 300, data: { label: 'Hệ thống' } },
+      { id: 'a1', type: 'actor', x: 60, y: 120, w: 80, h: 120, data: { label: 'User', isPrimary: true } },
+      { id: 'u1', type: 'useCase', x: 360, y: 140, w: 160, h: 80, data: { label: 'Login' } }
+    ],
+    initialEdges: [],
+    correctCondition: (nodes, edges) => {
+      return edges.some(e => e.source === 'a1' && e.target === 'u1' && e.type === 'association');
     },
-    correctSequence: ['act1', 'rel1', 'uc1'],
     explanation: [{ text: "Actor phải được nối với Use Case bằng đường Association. Ký hiệu <<include>> chỉ được dùng để nối 2 Use Case với nhau, không nối với Actor!", img: null }]
   },
   {
     id: 9,
     phase: 'skill_check', 
     type: 'interactive',
-    interactionType: 'equation_builder', 
+    interactionType: 'map_interaction', 
     title: 'Quy tắc Ràng buộc (Skill Check)',
-    question: 'Lắp ráp công thức: Một user không thể "Checkout" mà không qua "Process Payment".',
-    options: [
-      { id: 'e1', label: 'Checkout', type: 'usecase' },
-      { id: 'e2', label: '<<include>>', type: 'relation' },
-      { id: 'e3', label: '<<extend>>', type: 'relation' },
-      { id: 'e4', label: 'Process Payment', type: 'usecase' },
+    question: 'Hãy nối quan hệ: Một user không thể "Checkout" mà không qua "Process Payment".',
+    initialNodes: [
+      { id: 'b1', type: 'boundary', x: 200, y: 40, w: 500, h: 300, data: { label: 'Hệ thống' } },
+      { id: 'u1', type: 'useCase', x: 260, y: 140, w: 160, h: 80, data: { label: 'Checkout' } },
+      { id: 'u2', type: 'useCase', x: 500, y: 140, w: 160, h: 80, data: { label: 'Process Payment' } }
     ],
-    correctSequence: ['e1', 'e2', 'e4'],
+    initialEdges: [],
+    correctCondition: (nodes, edges) => {
+      return edges.some(e => e.source === 'u1' && e.target === 'u2' && e.type === 'include');
+    },
     explanation: [{ text: "Checkout phụ thuộc hoàn toàn vào Process Payment để hoàn tất. Sự phụ thuộc bắt buộc này phải dùng <<include>>.", img: null }]
   },
   {
@@ -169,6 +193,8 @@ export default function AdvancedLessonPlayer() {
   const [stepIndex, setStepIndex] = useState(0);
   const [xp, setXp] = useState(0);
   const [hasTried, setHasTried] = useState(false);
+  const [xpAddedAnim, setXpAddedAnim] = useState<number | null>(null);
+  const [isStreakPopupOpen, setIsStreakPopupOpen] = useState(false);
   
   // Interactive States
   const [status, setStatus] = useState('idle'); // idle, ready, running, correct, incorrect, showing_answer, skill_check_incorrect
@@ -196,6 +222,12 @@ export default function AdvancedLessonPlayer() {
   const [connections, setConnections] = useState<any[]>([]); // [{from, to}]
   
   const [runnerSelection, setRunnerSelection] = useState<any[]>([null, null, null]);
+
+  const [mapNodes, setMapNodes] = useState<any[]>([]);
+  const [mapEdges, setMapEdges] = useState<any[]>([]);
+  
+  // Track reset count to force InteractiveMap to remount or use initial state
+  const [mapResetKey, setMapResetKey] = useState(0);
 
   const currentData = LESSON_DATA[stepIndex];
   const progressPercent = (stepIndex / LESSON_DATA.length) * 100;
@@ -243,40 +275,24 @@ export default function AdvancedLessonPlayer() {
       const userIds = [...selectedText].sort();
       isCorrect = JSON.stringify(correctIds) === JSON.stringify(userIds);
       currentHint = 'Bạn chọn thiếu hoặc thừa rồi. Tìm đúng các cụm từ thể hiện "Hành động của người dùng".';
-    } else if (type === 'click_connect') {
-      const correctPairs = currentData.correctPairs;
-      if (connections.length !== correctPairs.length) {
-        isCorrect = false;
-      } else {
-        isCorrect = correctPairs.every(cp => 
-          connections.some(conn => conn.from === cp.from && conn.to === cp.to)
-        );
+    } else if (type === 'map_interaction') {
+      if (currentData.correctCondition) {
+        isCorrect = currentData.correctCondition(mapNodes, mapEdges);
+        currentHint = 'Bạn vẽ đường nối chưa chính xác. Vui lòng kiểm tra lại loại đường nối và hướng kết nối.';
       }
-      currentHint = 'Kết nối không hợp lý. Hãy xem ai có thẩm quyền thực hiện chức năng nào.';
-    } else if (type === 'map_runner') {
-      const userIds = runnerSelection.map(s => s?.id);
-      isCorrect = JSON.stringify(userIds) === JSON.stringify(currentData.correctSequence);
-      currentHint = 'Đường truyền lỗi! Không thể dùng <<include>> để nối Actor với phần mềm.';
-      
-      // Sandbox Runner Animation Trigger
-      setStatus('running');
-      setTimeout(() => {
-        if (isCorrect) {
-          setStatus('correct');
-          if (!hasTried && globalPhase === 'lesson') setXp(p => p + 10);
-        } else {
-          setStatus('incorrect');
-          setHint(currentHint);
-          setHasTried(true);
-        }
-      }, 2000);
-      return;
     }
 
     if (isCorrect) {
       setStatus('correct');
-      if (!hasTried && globalPhase === 'lesson') setXp(p => p + 15);
-      if (globalPhase === 'skill_check') setXp(p => p + 25);
+      let earned = 0;
+      if (!hasTried && globalPhase === 'lesson') earned = 15;
+      if (globalPhase === 'skill_check') earned = 25;
+      
+      if (earned > 0) {
+        setXp(p => p + earned);
+        setXpAddedAnim(earned);
+        setTimeout(() => setXpAddedAnim(null), 1500);
+      }
     } else {
       setStatus(globalPhase === 'skill_check' ? 'skill_check_incorrect' : 'incorrect');
       setHint(currentHint);
@@ -301,7 +317,10 @@ export default function AdvancedLessonPlayer() {
     setActiveConnectNode(null);
     setConnections([]);
     setRunnerSelection([null, null, null]);
-    // Do NOT reset hasViewedExplanation here so it persists logic, actually wait, reset it for new question.
+    setMapNodes([]);
+    setMapEdges([]);
+    setMapResetKey(prev => prev + 1);
+    
     setHasViewedExplanation(false); 
 
     if (stepIndex < LESSON_DATA.length - 1) {
@@ -637,36 +656,24 @@ export default function AdvancedLessonPlayer() {
       const isOverloaded = sliderVal > 80;
 
       return (
-        <div className="w-full mt-6 flex flex-col items-center gap-12 bg-[#1A1A1A] p-8 rounded-3xl border border-neutral-800 relative overflow-hidden">
-           {/* Glow Effect */}
-           {isOverloaded && <div className="absolute inset-0 bg-red-500/10 blur-3xl rounded-3xl transition-opacity duration-1000"></div>}
+        <div className="w-full mt-6 flex flex-col items-center gap-6 relative">
            
-           {/* Visualizer */}
-           <div className="flex flex-col items-center justify-center w-full relative h-40 z-10">
-              {/* Connection Line */}
-              <svg className="absolute w-full h-full pointer-events-none top-0 left-0" style={{ zIndex: -1 }}>
-                 <path d="M 50% 50% Q 65% 25% 80% 25%" fill="none" stroke={isOverloaded ? '#EAB308' : '#333'} strokeWidth="3" strokeDasharray="6 6" className="transition-all duration-700" />
-              </svg>
-
-              {/* Base Use Case */}
-              <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 bg-[#0A0A0A] p-2 rounded-[50%]">
-                 <div className="w-32 h-16 border-2 border-white rounded-[50%] flex items-center justify-center bg-[#222] font-bold shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-                    Checkout
-                 </div>
-              </div>
-
-              {/* Extend Branch */}
-              <div className={`absolute top-0 right-[5%] flex flex-col items-center transition-all duration-700 origin-bottom-left
-                  ${isOverloaded ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-90'}`}>
-                 <div className="text-xs font-mono text-yellow-500 mb-1 font-bold bg-[#1A1A1A] px-2 rounded">&lt;&lt;extend&gt;&gt;</div>
-                 <div className="w-36 h-16 border-2 border-dashed border-yellow-500 rounded-[50%] flex items-center justify-center font-bold text-center text-sm px-2 bg-yellow-500/10 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.2)]">
-                    Show Error
-                 </div>
-              </div>
+           <div className="w-full h-[400px] border-2 border-neutral-800 rounded-3xl overflow-hidden shadow-2xl relative">
+              {isOverloaded && <div className="absolute inset-0 bg-red-500/10 blur-3xl transition-opacity duration-1000 pointer-events-none z-10"></div>}
+              <InteractiveMap 
+                 key={`map_${stepIndex}_${mapResetKey}`}
+                 initialNodes={isOverloaded ? currentData.overloadNodes : currentData.normalNodes} 
+                 initialEdges={isOverloaded ? currentData.overloadEdges : currentData.normalEdges}
+                 allowCreate={false}
+                 onChange={(nodes, edges) => {
+                   setMapNodes(nodes);
+                   setMapEdges(edges);
+                 }}
+              />
            </div>
 
            {/* Server Load Indicator */}
-           <div className="w-full flex flex-col items-center gap-4 mt-4 max-w-md z-10">
+           <div className="w-full flex flex-col items-center gap-4 mt-2 max-w-md z-10 bg-[#1A1A1A] p-6 rounded-3xl border border-neutral-800 shadow-xl">
               <div className="flex justify-between w-full text-sm font-black tracking-widest uppercase transition-colors">
                  <span className={isOverloaded ? "text-neutral-500" : "text-green-500"}>Normal</span>
                  <span className={isOverloaded ? 'text-red-500 animate-pulse' : 'text-neutral-400'}>{sliderVal}% Load</span>
@@ -819,14 +826,34 @@ export default function AdvancedLessonPlayer() {
              ))}
           </div>
           
-          {status === 'skill_check_incorrect' && (
+           {status === 'skill_check_incorrect' && (
              <div className="w-full p-4 border border-green-500/30 bg-green-900/20 rounded-xl flex flex-col items-center justify-center gap-2 text-green-400 font-bold animate-in fade-in mt-4">
                 <span className="text-sm uppercase tracking-widest text-green-500">Correct Sequence</span>
-                <span className="text-lg">{currentData.correctSequence.map(id => currentData.options.find(o=>o.id===id).label).join(' ➔ ')}</span>
+                <span className="text-lg">{currentData.correctSequence?.map(id => currentData.options?.find(o=>o.id===id)?.label).join(' ➔ ')}</span>
              </div>
           )}
         </div>
       )
+    }
+
+    if (type === 'map_interaction') {
+      return (
+        <div className="w-full h-[550px] mt-6 border-2 border-neutral-800 rounded-3xl overflow-hidden shadow-2xl relative">
+           <InteractiveMap 
+             key={`map_${stepIndex}_${mapResetKey}`}
+             initialNodes={currentData.initialNodes} 
+             initialEdges={currentData.initialEdges}
+             allowCreate={false}
+             onChange={(nodes, edges) => {
+               setMapNodes(nodes);
+               setMapEdges(edges);
+               if (status === 'idle' || status === 'incorrect') {
+                 setStatus('ready');
+               }
+             }}
+           />
+        </div>
+      );
     }
 
     // Fallback block mapping...
@@ -835,105 +862,22 @@ export default function AdvancedLessonPlayer() {
 
   const renderBottomBar = () => {
     return (
-      <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A] to-transparent z-40 flex items-end justify-between max-w-4xl mx-auto right-0">
-        
-        {/* Left Side: Mascot & Hints */}
-        <div className="flex items-end relative w-1/2 min-h-[80px]">
-          {globalPhase === 'lesson' && (
-            <div className="relative">
-              <div className="absolute -top-32 -left-8 w-24 h-24 drop-shadow-[0_0_15px_rgba(34,197,94,0.3)] animate-[bounce_3s_infinite]">
-                <Mascot state={status === 'correct' ? 'correct' : status === 'incorrect' ? 'hint' : status === 'showing_answer' ? 'explaining' : 'path_idle'} size="scale-100" />
-              </div>
-              
-              {/* Floating Tooltips based on state */}
-              {(status === 'incorrect' || status === 'showing_answer') && (
-                <div className={`absolute bottom-full left-1/2 mb-4 w-64 p-4 rounded-2xl text-sm font-bold shadow-xl animate-in slide-in-from-bottom-2 fade-in
-                  ${status === 'incorrect' ? 'bg-yellow-500 text-black' : 'bg-[#222] text-white border border-neutral-700'}`}>
-                  <div className={`absolute -bottom-2 left-6 w-4 h-4 rotate-45 ${status === 'incorrect' ? 'bg-yellow-500' : 'bg-[#222] border-b border-r border-neutral-700'}`}></div>
-                  {status === 'incorrect' && hint}
-                  {status === 'showing_answer' && "Đây là đáp án chính xác."}
-                </div>
-              )}
-              {status === 'correct' && (
-                <div className="absolute bottom-full left-1/2 mb-4 w-32 p-3 rounded-2xl text-sm font-bold bg-green-600 text-white shadow-xl animate-in slide-in-from-bottom-2 fade-in text-center">
-                  <div className="absolute -bottom-2 left-6 w-4 h-4 rotate-45 bg-green-600"></div>
-                  Tuyệt vời!
-                </div>
-              )}
-            </div>
-          )}
-
-          {globalPhase === 'skill_check' && status !== 'idle' && status !== 'ready' && status !== 'running' && (
-            <div className="flex items-center gap-3 mb-2 animate-in fade-in">
-              {status === 'correct' ? (
-                <><CheckCircle2 size={24} className="text-green-500" /> <span className="font-bold text-lg text-green-500">Chính xác</span></>
-              ) : (
-                <><AlertCircle size={24} className="text-red-500" /> <span className="font-bold text-lg text-red-500">Chưa đúng</span></>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Right Side: Action Buttons */}
-        <div className="flex items-center gap-3 w-1/2 justify-end">
-          
-          {status === 'idle' && (
-            <button disabled className="px-10 py-3.5 rounded-full font-black text-lg bg-[#222] text-neutral-500 cursor-not-allowed">Check</button>
-          )}
-
-          {status === 'ready' && (
-            <button onClick={handleCheck} className="px-10 py-3.5 rounded-full font-black text-lg bg-white text-black hover:bg-neutral-200 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center gap-2">
-              {currentData?.interactionType === 'map_runner' && <Play size={20} fill="currentColor" />}
-              Check
-            </button>
-          )}
-
-          {status === 'running' && (
-            <button disabled className="px-10 py-3.5 rounded-full font-black text-lg bg-white text-black opacity-80 cursor-wait">
-              Running...
-            </button>
-          )}
-
-          {status === 'correct' && (
-            <>
-              {currentData?.explanation && (
-                 <button onClick={() => { setIsModalOpen(true); setHasViewedExplanation(true); }} className="px-6 py-3.5 rounded-full font-bold text-[#AAA] hover:text-white bg-[#222] transition-colors">Why?</button>
-              )}
-              <button onClick={handleNext} className="px-10 py-3.5 rounded-full font-black text-lg bg-green-500 text-black hover:bg-green-400 active:scale-95 transition-all shadow-[0_0_20px_rgba(74,222,128,0.3)]">
-                {globalPhase === 'skill_check' && stepIndex === LESSON_DATA.length - 1 ? 'Finish' : 'Continue'}
-              </button>
-            </>
-          )}
-
-          {status === 'incorrect' && globalPhase === 'lesson' && (
-            <>
-              <button onClick={() => setStatus('showing_answer')} className="px-6 py-3.5 rounded-full font-bold text-white bg-[#333] hover:bg-[#444] transition-colors">See answer</button>
-              <button onClick={() => { setStatus('idle'); setHasTried(true); }} className="px-10 py-3.5 rounded-full font-black text-lg bg-yellow-500 text-black hover:bg-yellow-400 active:scale-95 transition-all shadow-[0_0_20px_rgba(234,179,8,0.3)]">Try again</button>
-            </>
-          )}
-
-          {status === 'showing_answer' && (
-            <>
-              <button onClick={() => { setIsModalOpen(true); setHasViewedExplanation(true); }} className="px-6 py-3.5 rounded-full font-bold text-white bg-transparent border-2 border-neutral-700 hover:border-neutral-500 transition-colors">Why?</button>
-              {/* If viewed explanation, lock it to "Continue". Else allow "Skip" */}
-              <button onClick={handleNext} className={`px-10 py-3.5 rounded-full font-black text-lg active:scale-95 transition-all ${hasViewedExplanation ? 'bg-white text-black' : 'bg-[#333] text-white hover:bg-[#444]'}`}>
-                {hasViewedExplanation ? 'Continue' : 'Skip explanation'}
-              </button>
-            </>
-          )}
-
-          {status === 'skill_check_incorrect' && (
-            <>
-              {currentData?.explanation && (
-                 <button onClick={() => { setIsModalOpen(true); setHasViewedExplanation(true); }} className="px-6 py-3.5 rounded-full font-bold text-[#AAA] hover:text-white bg-[#222] transition-colors">Why?</button>
-              )}
-              <button onClick={handleNext} className="px-10 py-3.5 rounded-full font-black text-lg bg-[#222] text-white border border-neutral-700 hover:bg-[#333] active:scale-95 transition-all">
-                {stepIndex === LESSON_DATA.length - 1 ? 'Finish' : 'Continue'}
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+      <LessonBottomBar
+        phase={globalPhase}
+        status={status}
+        isTheory={false}
+        hasExplanation={!!currentData?.explanation}
+        hint={hint}
+        isModalOpen={isModalOpen}
+        hasViewedExplanation={hasViewedExplanation}
+        isLastStep={stepIndex === LESSON_DATA.length - 1}
+        mascotState={status === 'correct' ? 'correct' : status === 'incorrect' ? 'hint' : status === 'showing_answer' ? 'explaining' : 'path_idle'}
+        onCheck={handleCheck}
+        onNext={handleNext}
+        onTryAgain={() => { setStatus('idle'); setHasTried(true); }}
+        onSeeAnswer={() => setStatus('showing_answer')}
+        onOpenModal={() => { setIsModalOpen(true); if (status === 'showing_answer' || status === 'skill_check_incorrect') setHasViewedExplanation(true); }}
+      />
     );
   };
 
@@ -942,11 +886,18 @@ export default function AdvancedLessonPlayer() {
     @keyframes dropIn { 0% { transform: translateY(-100vh); opacity: 0; } 30% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(100vh); opacity: 0; } }
     @keyframes splashUp { 0% { transform: translateY(100vh) scale(0.5); opacity: 0; } 20% { transform: translateY(0) scale(1); opacity: 1; } 80% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
     @keyframes slideRight { 0% { left: 0; opacity: 1; } 50% { left: 50%; opacity: 1; } 100% { left: 100%; opacity: 0; } }
+    @keyframes floatUpFadeXP { 0% { opacity: 0; transform: translateY(10px) scale(0.8); } 20% { opacity: 1; transform: translateY(-5px) scale(1.1); } 80% { opacity: 1; transform: translateY(-15px) scale(1); } 100% { opacity: 0; transform: translateY(-25px) scale(0.9); } }
+    @keyframes shakeScreen { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
   `;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white font-sans overflow-hidden flex flex-col relative selection:bg-green-500/30">
+    <div className="h-screen bg-[#000] text-white font-sans overflow-hidden flex flex-col relative selection:bg-green-500/30 p-2 md:p-3">
       <style>{styles}</style>
+      <div className={`flex-1 rounded-[2rem] border-2 flex flex-col relative overflow-hidden transition-all duration-300 bg-[#0a0a0a]
+          ${(status === 'incorrect' || status === 'skill_check_incorrect') ? 'border-[#ca8a04] animate-[shakeScreen_0.4s_ease-in-out]' : ''}
+          ${status === 'correct' ? 'border-[#4ADE80] shadow-[0_0_40px_rgba(74,222,128,0.15)]' : ''}
+          ${(status === 'idle' || status === 'ready' || status === 'showing_answer') ? 'border-neutral-800' : ''}
+      `}>
 
       {/* Intro Overlay */}
       {globalPhase === 'intro' && (
@@ -978,15 +929,43 @@ export default function AdvancedLessonPlayer() {
             {LESSON_DATA.map((_, i) => <div key={i} className="flex-1 border-r-4 border-[#0A0A0A] h-full z-10 last:border-r-0"></div>)}
           </div>
 
-          <div className="flex items-center gap-1.5 font-bold text-lg text-neutral-300">
-            <span className="animate-in slide-in-from-bottom-1 fade-in" key={xp}>{xp}</span>
-            <Zap size={22} className="text-yellow-500" fill="currentColor" />
+          <div className="flex items-center gap-5 font-bold text-lg text-neutral-300 relative">
+            {/* XP Sparkles */}
+            <div className="flex items-center gap-1.5 relative">
+               <span className="animate-in slide-in-from-bottom-1 fade-in text-blue-100/90" key={xp}>{xp}</span>
+               <Sparkles size={22} className="text-green-400" fill="currentColor" />
+               
+               {xpAddedAnim !== null && (
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-green-400 font-black text-xl pointer-events-none drop-shadow-[0_0_10px_rgba(74,222,128,0.8)] z-50 flex items-center whitespace-nowrap" style={{ animation: 'floatUpFadeXP 1.5s ease-out forwards' }}>
+                     +{xpAddedAnim}
+                  </div>
+               )}
+            </div>
+
+            {/* Streak Lightning */}
+            <div className="relative">
+               <button onClick={() => setIsStreakPopupOpen(!isStreakPopupOpen)} className="flex items-center hover:scale-110 active:scale-95 transition-transform">
+                  <Zap size={24} className="text-[#D9F93F]" fill="currentColor" stroke="none" />
+               </button>
+               
+               {isStreakPopupOpen && (
+                  <div className="absolute top-12 right-0 w-64 bg-[#222] border border-neutral-700 rounded-2xl p-5 shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 animate-in fade-in slide-in-from-top-2">
+                     <div className="absolute -top-2 right-2 w-4 h-4 rotate-45 bg-[#222] border-t border-l border-neutral-700"></div>
+                     <h3 className="text-xl font-bold text-white text-center mb-1">Nice work today!</h3>
+                     <p className="text-neutral-400 text-center mb-5 text-sm">Keep it up.</p>
+                     <div className="flex justify-center gap-2">
+                        <div className="bg-[#D9F93F] text-black px-1.5 py-1 rounded-sm"><Zap size={20} fill="currentColor" stroke="none" /></div>
+                        <div className="bg-[#D9F93F] text-black px-1.5 py-1 rounded-sm"><Zap size={20} fill="currentColor" stroke="none" /></div>
+                     </div>
+                  </div>
+               )}
+            </div>
           </div>
         </header>
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative max-w-3xl mx-auto w-full px-6 pt-4 pb-40 z-10">
+      <main className="flex-1 flex flex-col relative max-w-3xl mx-auto w-full px-6 pt-4 pb-40 z-10 overflow-y-auto custom-scrollbar">
         
         {/* Completion Screen */}
         {globalPhase === 'complete' && (
@@ -1014,6 +993,7 @@ export default function AdvancedLessonPlayer() {
       </main>
 
       {(globalPhase === 'lesson' || globalPhase === 'skill_check') && renderBottomBar()}
+      </div>
 
       {/* Explanation Modal */}
       {isModalOpen && currentData?.explanation && (

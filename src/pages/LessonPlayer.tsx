@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Zap, RotateCcw, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Mascot from '../components/Mascot';
-
+import LessonBottomBar from '../components/LessonBottomBar';
 const PodiumSVG = () => (
   <svg viewBox="0 0 200 100" className="w-64 h-32 absolute bottom-0 left-1/2 -translate-x-1/2">
     <ellipse cx="100" cy="50" rx="80" ry="25" fill="#EAB308" opacity="0.3" filter="blur(10px)" />
@@ -308,130 +308,22 @@ export default function LessonPlayer() {
       </main>
 
       {/* --- BOTTOM CONTROLS & MASCOT --- */}
-      {(phase === 'learning' || phase === 'skill_check' || phase === 'complete') && (
-        <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A] to-transparent z-40 flex items-end justify-between max-w-4xl mx-auto right-0">
-          
-          <div className="flex items-end relative w-1/2 h-[120px]">
-            {phase === 'learning' && (
-              <div className="relative">
-                <div className="absolute bottom-0 left-0">
-                  <Mascot state={getMascotState()} size="scale-[0.6]" />
-                </div>
-                
-                {(status === 'correct' || status === 'incorrect' || status === 'showing_answer') && (
-                  <div className={`absolute bottom-[100px] left-16 mb-4 w-64 p-4 rounded-2xl text-sm font-bold shadow-xl animate-in slide-in-from-bottom-2 fade-in
-                    ${status === 'correct' ? 'bg-green-800 text-white' : 
-                      status === 'incorrect' ? 'bg-yellow-500 text-black' : 
-                      'bg-[#222] text-white border border-neutral-700'}`}
-                  >
-                    <div className={`absolute -bottom-2 left-6 w-4 h-4 rotate-45 
-                      ${status === 'correct' ? 'bg-green-800' : 
-                        status === 'incorrect' ? 'bg-yellow-500' : 
-                        'bg-[#222] border-b border-r border-neutral-700'}`}>
-                    </div>
-                    {status === 'correct' && "That's it!"}
-                    {status === 'incorrect' && selectedOption?.hint}
-                    {status === 'showing_answer' && "Here's the answer"}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {phase === 'skill_check' && status !== 'idle' && status !== 'ready' && (
-              <div className="flex items-center gap-3 mb-2 animate-in fade-in">
-                {status === 'correct' ? (
-                  <><CheckCircle2 size={24} className="text-green-500" /> <span className="font-bold text-lg text-green-500">Correct</span></>
-                ) : (
-                  <><AlertCircle size={24} className="text-red-500" /> <span className="font-bold text-lg text-red-500">Incorrect</span></>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className={`flex items-center gap-3 w-1/2 justify-end ${phase === 'complete' ? 'w-full justify-center' : ''}`}>
-            {phase === 'complete' && (
-               <Link to="/" className="w-full max-w-sm bg-[#EEE] text-center text-black font-black text-lg py-4 rounded-full hover:bg-white active:scale-95 transition-all">
-                 Continue
-               </Link>
-            )}
-
-            {phase === 'learning' && currentData?.type === 'theory' && (
-              <button onClick={handleNext} className="px-10 py-3.5 rounded-full font-black text-lg bg-[#EEE] text-black hover:bg-white active:scale-95 transition-all">
-                Continue
-              </button>
-            )}
-
-            {(phase === 'learning' || phase === 'skill_check') && currentData?.type !== 'theory' && (
-              <>
-                {status === 'idle' && (
-                  <button disabled className="px-10 py-3.5 rounded-full font-black text-lg bg-[#222] text-neutral-500 cursor-not-allowed">
-                    Check
-                  </button>
-                )}
-
-                {status === 'ready' && (
-                  <button onClick={handleCheck} className="px-10 py-3.5 rounded-full font-black text-lg bg-[#EEE] text-black hover:bg-white active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                    Check
-                  </button>
-                )}
-
-                {status === 'correct' && (
-                  <>
-                    <button onClick={() => setIsModalOpen(true)} className="px-6 py-3.5 rounded-full font-bold text-[#AAA] hover:text-white bg-[#222] transition-colors">
-                      Why?
-                    </button>
-                    <button onClick={handleNext} className="px-10 py-3.5 rounded-full font-black text-lg bg-green-500 text-black hover:bg-green-400 active:scale-95 transition-all shadow-[0_0_20px_rgba(74,222,128,0.3)]">
-                      {phase === 'skill_check' && currentStep === LESSON_DATA.length - 1 ? 'Finish' : 'Continue'}
-                    </button>
-                  </>
-                )}
-
-                {status === 'incorrect' && (
-                  <>
-                    <button onClick={handleSeeAnswer} className="px-6 py-3.5 rounded-full font-bold text-white bg-[#333] hover:bg-[#444] transition-colors">
-                      See answer
-                    </button>
-                    <button onClick={handleTryAgain} className="px-10 py-3.5 rounded-full font-black text-lg bg-yellow-500 text-black hover:bg-yellow-400 active:scale-95 transition-all shadow-[0_0_20px_rgba(234,179,8,0.3)]">
-                      Try again
-                    </button>
-                  </>
-                )}
-
-                {status === 'showing_answer' && (
-                  <>
-                    <button 
-                      onClick={() => { setIsModalOpen(true); setHasViewedExplanation(true); }} 
-                      className="px-6 py-3.5 rounded-full font-bold text-white bg-transparent border-2 border-neutral-700 hover:border-neutral-500 transition-colors"
-                    >
-                      Why?
-                    </button>
-                    {(!isModalOpen && !hasViewedExplanation) ? (
-                      <button onClick={handleNext} className="px-10 py-3.5 rounded-full font-bold text-white bg-[#333] hover:bg-[#444] active:scale-95 transition-all">
-                        Skip explanation
-                      </button>
-                    ) : (
-                       <button onClick={handleNext} className="px-10 py-3.5 rounded-full font-black text-lg bg-[#EEE] text-black hover:bg-white active:scale-95 transition-all">
-                         Continue
-                       </button>
-                    )}
-                  </>
-                )}
-
-                {status === 'skill_check_incorrect' && (
-                  <>
-                    <button onClick={() => setIsModalOpen(true)} className="px-6 py-3.5 rounded-full font-bold text-[#AAA] hover:text-white bg-[#222] transition-colors">
-                      Why?
-                    </button>
-                    <button onClick={handleNext} className="px-10 py-3.5 rounded-full font-black text-lg bg-[#222] text-white hover:bg-[#333] border border-neutral-700 active:scale-95 transition-all">
-                       {currentStep === LESSON_DATA.length - 1 ? 'Finish' : 'Continue'}
-                    </button>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      <LessonBottomBar
+        phase={phase}
+        status={status}
+        isTheory={currentData?.type === 'theory'}
+        hasExplanation={!!currentData?.explanation}
+        hint={selectedOption?.hint}
+        isModalOpen={isModalOpen}
+        hasViewedExplanation={hasViewedExplanation}
+        isLastStep={currentStep === LESSON_DATA.length - 1}
+        mascotState={getMascotState()}
+        onCheck={handleCheck}
+        onNext={handleNext}
+        onTryAgain={handleTryAgain}
+        onSeeAnswer={handleSeeAnswer}
+        onOpenModal={() => setIsModalOpen(true)}
+      />
 
       {/* --- EXPLANATION MODAL (Why?) --- */}
       {isModalOpen && currentData?.explanation && (
