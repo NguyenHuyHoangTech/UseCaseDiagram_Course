@@ -124,6 +124,7 @@ export const Mascot = ({ state = 'path_idle', className = '', size }: { state?: 
     level_failed: { grad: "gray-grad", face: "sad", anim: "animate-[drop-heavy_1s_ease-out_forwards]", aura: "bg-neutral-600/20", showSweat: true, showDumbbell: true, leftHand: "translate-y-4", rightHand: "translate-y-4" },
     level_complete: { grad: "gold-grad", face: "starry", anim: "animate-[levitate_2s_ease-in-out_infinite]", aura: "bg-yellow-500/40", showPodium: true, showCrown: true, leftHand: "-translate-y-2", rightHand: "-translate-y-2" },
     course_complete: { grad: "rainbow-grad", face: "starry", anim: "animate-[levitate_1s_ease-in-out_infinite]", aura: "bg-white/40", showEpicAura: true, showSunglasses: true, leftHand: "-translate-y-4", rightHand: "-translate-y-4" },
+    explaining: { grad: "blue-grad", face: "happy", anim: "animate-[levitate_3s_ease-in-out_infinite]", aura: "bg-blue-500/30", showGlasses: true, leftHand: "-translate-y-4", rightHand: "animate-[beckon-hand_2.5s_infinite]" },
   };
 
   const current = config[state] || config.path_idle;
@@ -241,6 +242,15 @@ export const Mascot = ({ state = 'path_idle', className = '', size }: { state?: 
             <g className="z-30 drop-shadow-md">
                <path d="M 22 45 L 78 45 L 75 55 Q 60 65 50 50 Q 40 65 25 55 Z" fill="#111" />
                <path d="M 25 47 L 45 47 M 55 47 L 75 47" stroke="white" strokeWidth="2" opacity="0.3" strokeLinecap="round" />
+            </g>
+          )}
+
+          {/* Kính cận trí thức (Explaining) */}
+          {current.showGlasses && (
+            <g className="z-30 drop-shadow-sm">
+               <rect x="24" y="44" width="22" height="14" rx="4" fill="none" stroke="#222" strokeWidth="2.5" />
+               <rect x="54" y="44" width="22" height="14" rx="4" fill="none" stroke="#222" strokeWidth="2.5" />
+               <path d="M 46 48 L 54 48" stroke="#222" strokeWidth="2.5" />
             </g>
           )}
 

@@ -167,9 +167,9 @@ export default function LessonPlayer() {
 
   const getMascotState = () => {
     if (status === 'correct') return 'correct';
-    if (status === 'incorrect') return 'shocked';
-    if (status === 'showing_answer') return 'hint';
-    return 'thinking';
+    if (status === 'incorrect') return 'hint';
+    if (status === 'showing_answer') return 'explaining';
+    return 'path_idle';
   };
 
   return (

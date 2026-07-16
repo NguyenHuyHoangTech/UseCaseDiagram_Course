@@ -842,7 +842,7 @@ export default function AdvancedLessonPlayer() {
           {globalPhase === 'lesson' && (
             <div className="relative">
               <div className="absolute -top-32 -left-8 w-24 h-24 drop-shadow-[0_0_15px_rgba(34,197,94,0.3)] animate-[bounce_3s_infinite]">
-                <Mascot state={status === 'correct' ? 'correct' : status === 'incorrect' ? 'hint' : 'path_idle'} size="scale-100" />
+                <Mascot state={status === 'correct' ? 'correct' : status === 'incorrect' ? 'hint' : status === 'showing_answer' ? 'explaining' : 'path_idle'} size="scale-100" />
               </div>
               
               {/* Floating Tooltips based on state */}
