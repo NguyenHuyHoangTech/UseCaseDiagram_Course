@@ -2,194 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { X, Zap, Sparkles, CheckCircle2, AlertCircle, RotateCcw, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import Mascot from '../components/Mascot';
 import LessonBottomBar from '../components/LessonBottomBar';
 import InteractiveMap from '../components/InteractiveMap';
+import { ALL_LESSONS } from '../data/lessons';
 
-
-const LESSON_DATA = [
-  {
-    id: 1,
-    phase: 'learning',
-    type: 'interactive',
-    interactionType: 'true_false', 
-    title: 'Khởi động tư duy',
-    question: '"Một Actor trong Use Case Diagram luôn luôn phải là con người (nhân viên, khách hàng)."',
-    options: [
-      { id: 't', label: 'Đúng vậy', isCorrect: false, hint: 'Máy móc, cảm biến, hay một hệ thống phần mềm khác có tương tác với hệ thống của bạn không?' },
-      { id: 'f', label: 'Không chính xác', isCorrect: true, hint: '' }
-    ],
-    explanation: [{ text: "Actor đại diện cho BẤT KỲ thực thể ngoại vi nào tương tác với hệ thống. Nó có thể là con người, hoặc một API máy chủ khác, cảm biến thời tiết, v.v.", img: null }]
-  },
-  {
-    id: 2,
-    phase: 'learning',
-    type: 'interactive',
-    interactionType: 'drag_to_bins',
-    title: 'Phân loại Đối tượng',
-    question: 'Chạm/Kéo thả các thành phần vào đúng giỏ phân loại của nó.',
-    options: [
-      { id: 't1', label: 'Khách hàng', correctBin: 'actor' },
-      { id: 't2', label: 'Thanh toán đơn hàng', correctBin: 'usecase' },
-      { id: 't3', label: 'Cổng thanh toán Momo', correctBin: 'actor' },
-      { id: 't4', label: 'Đăng nhập', correctBin: 'usecase' }
-    ],
-    bins: [
-      { id: 'actor', label: 'Actor (Tác nhân)' },
-      { id: 'usecase', label: 'Use Case (Chức năng)' }
-    ],
-    explanation: [{ text: "Actor là các danh từ chỉ đối tượng giao tiếp với hệ thống (Khách hàng, Cổng Momo). Use Case là các cụm Động từ + Danh từ thể hiện chức năng hệ thống thực hiện.", img: null }]
-  },
-  {
-    id: 3,
-    phase: 'learning',
-    type: 'interactive',
-    interactionType: 'text_highlight',
-    title: 'Phân tích Yêu cầu',
-    question: 'Hãy chạm để chọn (highlight) các cụm từ thể hiện Use Case trong đoạn văn sau:',
-    textChunks: [
-      { id: 'c1', text: 'Hệ thống ứng dụng cho phép ', isCorrect: false },
-      { id: 'c2', text: 'người dùng', isCorrect: false },
-      { id: 'c3', text: ' có thể ', isCorrect: false },
-      { id: 'c4', text: 'Đăng ký tài khoản', isCorrect: true },
-      { id: 'c5', text: ' mới. Sau khi vào màn hình chính, họ tiến hành ', isCorrect: false },
-      { id: 'c6', text: 'Tìm kiếm sản phẩm', isCorrect: true },
-      { id: 'c7', text: ' theo danh mục để mua sắm.', isCorrect: false }
-    ],
-    explanation: [{ text: "Việc phân tích văn bản rất quan trọng. Những hành động mang lại giá trị trực tiếp cho người dùng như 'Đăng ký tài khoản' hay 'Tìm kiếm sản phẩm' sẽ trở thành Use Case.", img: null }]
-  },
-  {
-    id: 4,
-    phase: 'learning',
-    type: 'interactive',
-    interactionType: 'map_interaction',
-    title: 'Thiết lập Liên kết (Association)',
-    question: 'Vẽ đường nối (Association) để gán quyền tương tác từ Khách hàng đến "Xem lịch sử mua hàng" và Quản trị viên đến "Xóa tài khoản".',
-    initialNodes: [
-      { id: 'b1', type: 'boundary', x: 280, y: 40, w: 400, h: 440, data: { label: 'Hệ thống' } },
-      { id: 'a1', type: 'actor', x: 60, y: 120, w: 80, h: 120, data: { label: 'Khách hàng', isPrimary: true } },
-      { id: 'a2', type: 'actor', x: 60, y: 320, w: 80, h: 120, data: { label: 'Quản trị viên', isPrimary: true } },
-      { id: 'u1', type: 'useCase', x: 360, y: 140, w: 200, h: 80, data: { label: 'Xem lịch sử mua hàng' } },
-      { id: 'u2', type: 'useCase', x: 360, y: 320, w: 200, h: 80, data: { label: 'Xóa tài khoản người dùng' } }
-    ],
-    initialEdges: [],
-    correctCondition: (nodes, edges) => {
-      const hasA1U1 = edges.some(e => e.source === 'a1' && e.target === 'u1' && e.type === 'association');
-      const hasA2U2 = edges.some(e => e.source === 'a2' && e.target === 'u2' && e.type === 'association');
-      return hasA1U1 && hasA2U2;
-    },
-    explanation: [{ text: "Đường Association (liên kết cơ bản) thể hiện việc Actor đó có quyền kích hoạt hoặc tham gia vào Use Case tương ứng.", img: null }]
-  },
-  {
-    id: 5,
-    phase: 'learning',
-    type: 'interactive',
-    interactionType: 'slider_exploratory', 
-    title: 'Simulating Exceptional Flows (<<extend>>)',
-    question: 'Kéo thanh tải trọng server. Quan sát khi nào chức năng ngoại lệ được kích hoạt.',
-    normalNodes: [
-      { id: 'b1', type: 'boundary', x: 280, y: 40, w: 400, h: 300, data: { label: 'Hệ thống' } },
-      { id: 'u1', type: 'useCase', x: 360, y: 200, w: 160, h: 80, data: { label: 'Checkout' } }
-    ],
-    overloadNodes: [
-      { id: 'b1', type: 'boundary', x: 280, y: 40, w: 400, h: 300, data: { label: 'Hệ thống' } },
-      { id: 'u1', type: 'useCase', x: 360, y: 200, w: 160, h: 80, data: { label: 'Checkout' } },
-      { id: 'u2', type: 'useCase', x: 360, y: 100, w: 160, h: 60, data: { label: 'Show Error' } }
-    ],
-    normalEdges: [],
-    overloadEdges: [
-      { id: 'e1', source: 'u2', target: 'u1', type: 'extend' }
-    ],
-    explanation: [{ text: "<<extend>> relationships được sử dụng cho các luồng rẽ nhánh, lỗi, hoặc hành vi tùy chọn chỉ xảy ra trong điều kiện cụ thể (như server bị quá tải).", img: null }]
-  },
-  {
-    id: 6,
-    phase: 'learning',
-    type: 'interactive',
-    interactionType: 'ordering', 
-    title: 'Trình tự Thiết kế Hệ thống',
-    question: 'Sắp xếp các bước từ trên (đầu tiên) xuống dưới (cuối cùng).',
-    options: [
-      { id: 'o1', label: 'Xác định Ranh giới Hệ thống (Boundary)', correctOrder: 1 },
-      { id: 'o2', label: 'Xác định Primary Actors', correctOrder: 2 },
-      { id: 'o3', label: 'Định nghĩa Core Use Cases', correctOrder: 3 },
-      { id: 'o4', label: 'Khai báo Include/Extend', correctOrder: 4 }
-    ],
-    explanation: [{ text: "Tư duy đúng: Bạn phải biết mình xây cái gì (Ranh giới), cho ai dùng (Actor), làm được gì (Use Case), rồi mới tối ưu luồng (Include/Extend).", img: null }]
-  },
-  {
-    id: 7,
-    phase: 'learning',
-    type: 'interactive',
-    interactionType: 'map_interaction', 
-    title: 'Biên dịch Sơ đồ thành Kiến trúc',
-    question: 'Hãy vẽ một đường nối Association từ Khách hàng đến chức năng Duyệt Catalog.',
-    initialNodes: [
-      { id: 'b1', type: 'boundary', x: 280, y: 40, w: 400, h: 300, data: { label: 'Hệ thống' } },
-      { id: 'a1', type: 'actor', x: 60, y: 120, w: 80, h: 120, data: { label: 'Khách hàng', isPrimary: true } },
-      { id: 'u1', type: 'useCase', x: 360, y: 140, w: 160, h: 80, data: { label: 'Duyệt Catalog' } }
-    ],
-    initialEdges: [],
-    correctCondition: (nodes, edges) => {
-      return edges.some(e => e.source === 'a1' && e.target === 'u1' && e.type === 'association');
-    },
-    explanation: [{ text: "Actor giao tiếp trực tiếp với Use Case thông qua một đường Association đơn giản không có mũi tên.", img: null }]
-  },
-  {
-    id: 8,
-    phase: 'learning',
-    type: 'interactive',
-    interactionType: 'map_interaction',
-    title: 'Mô phỏng Luồng chạy (Sandbox)',
-    question: 'Hãy tạo luồng đúng giữa User và Login.',
-    initialNodes: [
-      { id: 'b1', type: 'boundary', x: 280, y: 40, w: 400, h: 300, data: { label: 'Hệ thống' } },
-      { id: 'a1', type: 'actor', x: 60, y: 120, w: 80, h: 120, data: { label: 'User', isPrimary: true } },
-      { id: 'u1', type: 'useCase', x: 360, y: 140, w: 160, h: 80, data: { label: 'Login' } }
-    ],
-    initialEdges: [],
-    correctCondition: (nodes, edges) => {
-      return edges.some(e => e.source === 'a1' && e.target === 'u1' && e.type === 'association');
-    },
-    explanation: [{ text: "Actor phải được nối với Use Case bằng đường Association. Ký hiệu <<include>> chỉ được dùng để nối 2 Use Case với nhau, không nối với Actor!", img: null }]
-  },
-  {
-    id: 9,
-    phase: 'skill_check', 
-    type: 'interactive',
-    interactionType: 'map_interaction', 
-    title: 'Quy tắc Ràng buộc (Skill Check)',
-    question: 'Hãy nối quan hệ: Một user không thể "Checkout" mà không qua "Process Payment".',
-    initialNodes: [
-      { id: 'b1', type: 'boundary', x: 200, y: 40, w: 500, h: 300, data: { label: 'Hệ thống' } },
-      { id: 'u1', type: 'useCase', x: 260, y: 140, w: 160, h: 80, data: { label: 'Checkout' } },
-      { id: 'u2', type: 'useCase', x: 500, y: 140, w: 160, h: 80, data: { label: 'Process Payment' } }
-    ],
-    initialEdges: [],
-    correctCondition: (nodes, edges) => {
-      return edges.some(e => e.source === 'u1' && e.target === 'u2' && e.type === 'include');
-    },
-    explanation: [{ text: "Checkout phụ thuộc hoàn toàn vào Process Payment để hoàn tất. Sự phụ thuộc bắt buộc này phải dùng <<include>>.", img: null }]
-  },
-  {
-    id: 10,
-    phase: 'skill_check',
-    type: 'interactive',
-    interactionType: 'mcq', 
-    title: 'Bản chất Ranh giới (Skill Check)',
-    question: 'Chức năng cốt lõi của System Boundary là gì?',
-    options: [
-      { id: 'm1', label: 'Gom nhóm các Actor lại với nhau để dễ nhìn.', isCorrect: false },
-      { id: 'm2', label: 'Tách biệt rạch ròi trách nhiệm của phần mềm (bên trong) với môi trường (bên ngoài).', isCorrect: true },
-      { id: 'm3', label: 'Xác định các server vật lý chứa dữ liệu.', isCorrect: false }
-    ],
-    explanation: [{ text: "System Boundary là một ranh giới khái niệm. Mọi Use Case (bên trong) là phần code bạn phải viết. Mọi Actor (bên ngoài) là những thứ bạn không kiểm soát được.", img: null }]
-  }
-];
 
 export default function AdvancedLessonPlayer() {
-  const [globalPhase, setGlobalPhase] = useState('intro'); // intro, lesson, skill_check_splash, skill_check, complete
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const LESSON_DATA = id && ALL_LESSONS[id] ? ALL_LESSONS[id] : [];
+
+  const [globalPhase, setGlobalPhase] = useState('lesson'); // intro, lesson, skill_check_splash, skill_check, complete
   const [stepIndex, setStepIndex] = useState(0);
   const [xp, setXp] = useState(0);
   const [hasTried, setHasTried] = useState(false);
@@ -235,6 +60,12 @@ export default function AdvancedLessonPlayer() {
   const progressPercent = (stepIndex / LESSON_DATA.length) * 100;
 
   useEffect(() => {
+    if (!LESSON_DATA || LESSON_DATA.length === 0) {
+      navigate('/');
+      return;
+    }
+    
+    // Auto-advance if globalPhase is intro
     if (globalPhase === 'intro') {
       setTimeout(() => setGlobalPhase('lesson'), 2500);
     } else if (globalPhase === 'skill_check_splash') {

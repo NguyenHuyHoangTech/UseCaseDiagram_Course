@@ -18,46 +18,18 @@ export default function Header() {
             >
               Dashboard
             </NavLink>
-            <NavLink 
-              to="/lesson" 
-              className={({ isActive }) => 
-                `h-full font-bold flex items-center border-b-4 transition-colors ${isActive ? 'border-white text-white' : 'border-transparent text-neutral-400 hover:text-neutral-200'}`
-              }
-            >
-              Lesson
-            </NavLink>
-            <NavLink 
-              to="/advanced-lesson" 
-              className={({ isActive }) => 
-                `h-full font-bold flex items-center border-b-4 transition-colors ${isActive ? 'border-white text-white' : 'border-transparent text-neutral-400 hover:text-neutral-200'}`
-              }
-            >
-              Advanced Lesson
-            </NavLink>
-            <NavLink 
-              to="/review" 
-              className={({ isActive }) => 
-                `h-full font-bold flex items-center border-b-4 transition-colors ${isActive ? 'border-white text-white' : 'border-transparent text-neutral-400 hover:text-neutral-200'}`
-              }
-            >
-              Review
-            </NavLink>
-            <NavLink 
-              to="/map" 
-              className={({ isActive }) => 
-                `h-full font-bold flex items-center border-b-4 transition-colors ${isActive ? 'border-white text-white' : 'border-transparent text-neutral-400 hover:text-neutral-200'}`
-              }
-            >
-              Test Map
-            </NavLink>
-            <NavLink 
-              to="/playground" 
-              className={({ isActive }) => 
-                `h-full font-bold flex items-center border-b-4 transition-colors ${isActive ? 'border-white text-white' : 'border-transparent text-neutral-400 hover:text-neutral-200'}`
-              }
-            >
-              Playground
-            </NavLink>
+            <div className="relative group h-full flex items-center">
+              <span className="font-bold text-neutral-400 cursor-pointer hover:text-neutral-200 h-full flex items-center border-b-4 border-transparent">
+                More ▼
+              </span>
+              <div className="absolute top-16 left-0 w-48 bg-[#1A1A1A] border border-neutral-800 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity flex flex-col overflow-hidden z-50">
+                <Link to="/lesson/1" className="px-4 py-3 font-bold text-neutral-300 hover:bg-[#222] hover:text-white transition-colors">Lesson</Link>
+                <Link to="/advanced-lesson/3" className="px-4 py-3 font-bold text-neutral-300 hover:bg-[#222] hover:text-white transition-colors">Advanced Lesson</Link>
+                <Link to="/review" className="px-4 py-3 font-bold text-neutral-300 hover:bg-[#222] hover:text-white transition-colors">Review</Link>
+                <Link to="/map" className="px-4 py-3 font-bold text-neutral-300 hover:bg-[#222] hover:text-white transition-colors">Test Map</Link>
+                <Link to="/playground" className="px-4 py-3 font-bold text-neutral-300 hover:bg-[#222] hover:text-white transition-colors">Playground</Link>
+              </div>
+            </div>
           </nav>
         </div>
         <div className="flex items-center gap-4">

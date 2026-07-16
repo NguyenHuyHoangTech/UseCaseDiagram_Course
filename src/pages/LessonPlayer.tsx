@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, Zap, Sparkles, RotateCcw, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import Mascot from '../components/Mascot';
 import LessonBottomBar from '../components/LessonBottomBar';
+import { ALL_LESSONS } from '../data/lessons';
 const PodiumSVG = () => (
   <svg viewBox="0 0 200 100" className="w-64 h-32 absolute bottom-0 left-1/2 -translate-x-1/2">
     <ellipse cx="100" cy="50" rx="80" ry="25" fill="#EAB308" opacity="0.3" filter="blur(10px)" />
@@ -14,84 +15,12 @@ const PodiumSVG = () => (
   </svg>
 );
 
-const LESSON_DATA = [
-  {
-    id: 0,
-    type: 'theory',
-    title: 'The System Boundary',
-    subtitle: 'Let’s learn how to separate what is inside the software from what is outside using Use Case Diagrams.',
-    image: (
-      <div className="w-full h-64 bg-[#1A1A1A] rounded-2xl border border-neutral-800 flex items-center justify-center relative overflow-hidden">
-        <div className="w-48 h-32 border-2 border-dashed border-blue-500/50 rounded-xl flex items-center justify-center relative bg-blue-900/10">
-           <span className="absolute -top-3 left-3 bg-[#1A1A1A] px-2 text-xs text-blue-400 font-mono">System</span>
-           <div className="w-16 h-8 border-2 border-white rounded-[50%] flex items-center justify-center text-xs">Login</div>
-        </div>
-        <div className="absolute left-10 flex flex-col items-center">
-           <div className="w-6 h-6 rounded-full border-2 border-white"></div>
-           <div className="w-1 h-6 bg-white"></div>
-           <div className="w-6 h-1 bg-white -mt-4"></div>
-           <span className="text-xs mt-2 text-neutral-400">Actor</span>
-        </div>
-      </div>
-    )
-  },
-  {
-    id: 1,
-    type: 'interactive',
-    interactionType: 'selection',
-    title: 'Select the entity that belongs OUTSIDE the system boundary.',
-    options: [
-      { id: 'opt1', label: 'Customer', icon: '👤', isCorrect: true, hint: '' },
-      { id: 'opt2', label: 'Database', icon: '🗄️', isCorrect: false, hint: 'Databases store data for your software. They are part of the internal system, not external users.' },
-      { id: 'opt3', label: 'Auth Logic', icon: '⚙️', isCorrect: false, hint: 'Logic and code are the internals of your system.' }
-    ],
-    explanation: [
-      { 
-        text: 'Actors are external entities. They can be humans (like a Customer) or other external systems (like a third-party Payment API).', 
-        img: <div className="h-32 bg-green-900/20 border border-green-500/30 rounded-xl flex items-center justify-center text-green-400 font-bold w-full">Actor = External</div> 
-      },
-      { 
-        text: 'The system boundary box contains only the functions (Use Cases) that your software is responsible for building.', 
-        img: <div className="h-32 bg-blue-900/20 border border-blue-500/30 rounded-xl flex items-center justify-center text-blue-400 font-bold w-full">Boundary = Responsibility</div> 
-      }
-    ]
-  },
-  {
-    id: 2,
-    type: 'theory',
-    title: 'Optional Behaviors',
-    subtitle: 'Sometimes a Use Case only happens under certain conditions. We use <<extend>> for this.',
-    image: (
-      <div className="w-full h-64 bg-[#1A1A1A] rounded-2xl border border-neutral-800 flex items-center justify-center gap-8">
-        <div className="w-24 h-12 border-2 border-white rounded-[50%] flex items-center justify-center text-xs text-center leading-tight">Checkout</div>
-        <div className="flex flex-col items-center">
-           <span className="text-[10px] text-yellow-500 font-mono mb-1">&lt;&lt;extend&gt;&gt;</span>
-           <div className="w-16 h-0 border-b-2 border-dashed border-yellow-500 relative">
-             <div className="absolute -left-1 -top-1.5 w-3 h-3 border-t-2 border-l-2 border-yellow-500 -rotate-45"></div>
-           </div>
-        </div>
-        <div className="w-24 h-12 border-2 border-neutral-500 rounded-[50%] flex items-center justify-center text-xs text-neutral-400 text-center leading-tight">Apply<br/>Coupon</div>
-      </div>
-    )
-  },
-  {
-    id: 3,
-    type: 'skill_check',
-    interactionType: 'selection',
-    title: 'Which of these represents a MANDATORY step that another Use Case always includes?',
-    options: [
-      { id: 'a', label: '<<extend>>', isCorrect: false },
-      { id: 'b', label: '<<include>>', isCorrect: true },
-      { id: 'c', label: 'Association', isCorrect: false }
-    ],
-    explanation: [
-      { text: '<<include>> means the base use case CANNOT finish without calling the included use case. It is mandatory.', img: null }
-    ]
-  }
-];
-
 export default function LessonPlayer() {
-  const [phase, setPhase] = useState('intro_anim'); 
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const LESSON_DATA = id && ALL_LESSONS[id] ? ALL_LESSONS[id] : [];
+  
+  const [phase, setPhase] = useState('intro_anim');
   const [currentStep, setCurrentStep] = useState(0);
   const [xp, setXp] = useState(0);
   const [xpAddedAnim, setXpAddedAnim] = useState<number | null>(null);
@@ -107,6 +36,12 @@ export default function LessonPlayer() {
   const currentData = LESSON_DATA[currentStep];
 
   useEffect(() => {
+    if (!LESSON_DATA || LESSON_DATA.length === 0) {
+      navigate('/');
+      return;
+    }
+    
+    // Auto advance if intro
     if (phase === 'intro_anim') {
       const t = setTimeout(() => setPhase('learning'), 3500); 
       return () => clearTimeout(t);
