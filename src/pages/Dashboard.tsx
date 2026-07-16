@@ -1,17 +1,42 @@
 import { useState, useEffect, useRef } from 'react';
 import { Zap, Shield, Lock, Check, ArrowUp } from 'lucide-react';
 import Mascot from '../components/Mascot';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import { LESSON_METADATA } from '../data/lessons';
 
 const CourseIconSVG = () => (
-  <div className="relative w-24 h-24 flex items-center justify-center">
-    <div className="absolute w-20 h-16 bg-blue-500/20 rounded-xl transform rotate-6"></div>
-    <div className="absolute w-20 h-16 bg-blue-600 rounded-xl shadow-lg flex items-center justify-center -rotate-3">
-       <div className="w-12 h-2 bg-white/50 rounded-full mb-4"></div>
-       <div className="absolute bottom-4 left-4 w-6 h-6 rounded-full bg-yellow-400"></div>
-       <div className="absolute bottom-4 right-4 w-6 h-6 rounded-full bg-white"></div>
+  <div className="relative w-32 h-32 flex items-center justify-center group cursor-default mb-4">
+    {/* Animated glowing backdrop */}
+    <div className="absolute inset-0 bg-blue-500/20 rounded-3xl blur-2xl group-hover:bg-blue-400/30 transition-colors duration-500 pointer-events-none"></div>
+    
+    {/* Back layer (glass panel) */}
+    <div className="absolute w-28 h-28 bg-white/5 backdrop-blur-xl rounded-[2rem] transform rotate-12 border border-white/10 group-hover:rotate-[15deg] transition-transform duration-500"></div>
+    
+    {/* Middle layer (UML actors abstract) */}
+    <div className="absolute w-28 h-28 bg-gradient-to-br from-blue-600 to-indigo-900 rounded-[2rem] shadow-2xl flex items-center justify-center -rotate-6 group-hover:-rotate-3 transition-transform duration-500 overflow-hidden border border-blue-400/30">
+       <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2"></div>
+       <div className="absolute bottom-0 left-0 w-16 h-16 bg-yellow-400/20 rounded-full blur-xl transform -translate-x-1/2 translate-y-1/2"></div>
+       
+       <div className="relative w-full h-full flex flex-col items-center justify-center gap-3 p-4">
+          {/* Mock UML System Box */}
+          <div className="w-full h-10 bg-white/20 rounded-xl border border-white/30 backdrop-blur-md relative flex items-center justify-center shadow-inner group-hover:bg-white/30 transition-colors duration-500">
+             <div className="w-10 h-1.5 bg-white/50 rounded-full"></div>
+             {/* Small line connecting to actor */}
+             <div className="absolute -left-4 top-1/2 w-4 h-0.5 bg-yellow-400 shadow-[0_0_5px_rgba(250,204,21,0.8)]"></div>
+          </div>
+          <div className="flex gap-5 mt-1">
+             {/* Mock Actor 1 */}
+             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 shadow-[0_0_15px_rgba(250,204,21,0.6),_inset_0_2px_4px_rgba(255,255,255,0.8)] border border-yellow-200"></div>
+             {/* Mock Actor 2 */}
+             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-300 to-blue-500 shadow-[0_0_15px_rgba(34,211,238,0.6),_inset_0_2px_4px_rgba(255,255,255,0.8)] border border-cyan-200"></div>
+          </div>
+       </div>
+    </div>
+    
+    {/* Floating accent elements */}
+    <div className="absolute -top-3 -right-3 bg-gradient-to-br from-yellow-300 to-yellow-500 p-2.5 rounded-2xl shadow-[0_10px_20px_rgba(250,204,21,0.4)] transform rotate-12 animate-bounce border border-yellow-100">
+       <Zap size={18} className="text-yellow-900 fill-yellow-900 drop-shadow-md" />
     </div>
   </div>
 );
@@ -35,20 +60,38 @@ const sortedLevelKeys = Object.keys(LEVEL_INFO);
 const ACTIVE_LESSON_ID = 3;
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('courses'); // 'home' | 'courses'
+  const location = useLocation();
+  const isHome = location.pathname === '/home';
   const [isMascotVisible, setIsMascotVisible] = useState(true);
+  const [isSelectedNodeVisible, setIsSelectedNodeVisible] = useState(true);
   const [selectedLessonId, setSelectedLessonId] = useState(ACTIVE_LESSON_ID);
   
+  const selectedLessonData = LESSON_METADATA.find(l => l.id === selectedLessonId);
+  const isActiveLessonSelected = selectedLessonId === ACTIVE_LESSON_ID;
+  const isCardVisible = selectedLessonData && isSelectedNodeVisible;
+  const showJumpArrow = !isActiveLessonSelected || !isMascotVisible;
+
   const mascotRef = useRef<HTMLDivElement>(null);
+  const selectedNodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    const observer1 = new IntersectionObserver(
       ([entry]) => { setIsMascotVisible(entry.isIntersecting); },
       { root: null, threshold: 0.1, rootMargin: "-100px 0px 0px 0px" }
     );
-    if (mascotRef.current) observer.observe(mascotRef.current);
-    return () => observer.disconnect();
-  }, [activeTab]);
+    if (mascotRef.current) observer1.observe(mascotRef.current);
+
+    const observer2 = new IntersectionObserver(
+      ([entry]) => { setIsSelectedNodeVisible(entry.isIntersecting); },
+      { root: null, threshold: 0.1, rootMargin: "-100px 0px 0px 0px" }
+    );
+    if (selectedNodeRef.current) observer2.observe(selectedNodeRef.current);
+
+    return () => {
+      observer1.disconnect();
+      observer2.disconnect();
+    };
+  }, [selectedLessonId, isHome]);
 
   const scrollToCurrent = () => {
     setSelectedLessonId(ACTIVE_LESSON_ID);
@@ -148,27 +191,43 @@ export default function Dashboard() {
 
   const renderCourses = () => {
     let globalLessonIndex = 0;
+    const isLockedSelection = selectedLessonId > ACTIVE_LESSON_ID;
+    
+    const cardBorderClass = isLockedSelection 
+      ? "border-t-[6px] border-t-neutral-600 shadow-[0_30px_60px_rgba(0,0,0,0.9),_0_0_40px_rgba(255,255,255,0.05)]" 
+      : "border-t-[6px] border-t-yellow-500/80 shadow-[0_30px_60px_rgba(0,0,0,0.9),_0_0_40px_rgba(234,179,8,0.2)]";
 
     return (
-      <div className="max-w-5xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-16 animate-in fade-in">
+      <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-16 animate-in fade-in">
         
         {/* Left Column: Course Info (Sticky) */}
-        <div className="w-full lg:w-1/3">
-           <div className="sticky top-24 bg-[#1A1A1A] p-8 rounded-3xl border border-neutral-800 shadow-xl">
-              <CourseIconSVG />
-              <h1 className="text-3xl font-black mt-6 mb-3">Use Case Diagram</h1>
-              <p className="text-neutral-400 font-medium leading-relaxed mb-6">
-                Master software architecture. Learn how to define boundaries, identify actors, and design core system behaviors using UML standards.
-              </p>
-              <div className="flex items-center gap-6 font-bold text-sm text-neutral-300">
-                 <span className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-neutral-800 flex items-center justify-center"><Check size={12}/></div> 22 Lessons</span>
-                 <span className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-neutral-800 flex items-center justify-center"><Zap size={12}/></div> 240 Exercises</span>
+        <div className="w-full lg:w-[420px] shrink-0">
+           <div className="sticky top-24 relative group">
+              {/* Card glowing backdrop */}
+              <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent blur-3xl rounded-[3rem] pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity duration-1000"></div>
+              
+              <div className="relative bg-[#1A1A1A]/80 backdrop-blur-2xl p-10 rounded-[2.5rem] border border-neutral-700/50 shadow-[0_30px_60px_rgba(0,0,0,0.8),_inset_0_1px_1px_rgba(255,255,255,0.1)] group-hover:border-neutral-600/50 transition-colors duration-500">
+                 <CourseIconSVG />
+                 <h1 className="text-4xl font-black mt-8 mb-4 tracking-tight drop-shadow-md">Use Case Diagram</h1>
+                 <p className="text-neutral-400 font-medium leading-relaxed mb-8 text-lg">
+                   Master software architecture. Learn how to define boundaries, identify actors, and design core system behaviors using UML standards.
+                 </p>
+                 <div className="flex items-center gap-6 font-bold text-sm text-neutral-300">
+                    <span className="flex items-center gap-2 bg-neutral-900/80 px-4 py-2.5 rounded-full border border-neutral-800 shadow-inner">
+                       <div className="w-5 h-5 rounded-full bg-yellow-500/20 flex items-center justify-center"><Check size={12} className="text-yellow-500"/></div> 
+                       22 Lessons
+                    </span>
+                    <span className="flex items-center gap-2 bg-neutral-900/80 px-4 py-2.5 rounded-full border border-neutral-800 shadow-inner">
+                       <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center"><Zap size={12} className="text-blue-500 fill-blue-500"/></div> 
+                       240 Exercises
+                    </span>
+                 </div>
               </div>
            </div>
         </div>
 
-        {/* Right Column: The Path (No SVG, purely CSS Zigzag) */}
-        <div className="w-full lg:w-2/3 relative pb-40 flex flex-col items-center">
+        {/* Right Column: The Path */}
+        <div className="flex-1 relative pb-40 flex flex-col items-center">
            
            {sortedLevelKeys.map((levelKey) => {
              const levelData = LEVEL_INFO[levelKey];
@@ -179,9 +238,10 @@ export default function Dashboard() {
                <div key={levelKey} className="w-full flex flex-col items-center">
                  {/* Sticky Level Header */}
                  <div className="sticky top-[80px] z-30 w-full flex justify-center mt-12 mb-16 pointer-events-none">
-                    <div className="w-full max-w-xs bg-[#1A1A1A]/80 backdrop-blur-md py-3 px-8 rounded-full border border-neutral-700/50 text-center shadow-[0_10px_30px_rgba(0,0,0,0.8)] border-t border-t-neutral-600 pointer-events-auto">
-                       <span className="text-neutral-500 font-black text-[10px] tracking-widest uppercase">{levelData.num}</span>
-                       <h2 className="text-lg font-bold text-white mt-0.5">{levelData.name}</h2>
+                    <div className="w-full max-w-sm bg-gradient-to-b from-[#2A2A2A] to-[#111] py-4 px-10 rounded-full border-b-[6px] border-b-yellow-800 border-t border-t-yellow-300 border-x border-x-yellow-600/50 text-center shadow-[0_20px_40px_rgba(0,0,0,0.9),_0_0_20px_rgba(234,179,8,0.2),_inset_0_2px_10px_rgba(255,255,255,0.1)] pointer-events-auto relative overflow-hidden">
+                       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-yellow-300/40 blur-md rounded-full"></div>
+                       <span className="text-neutral-400 font-black text-[11px] tracking-widest uppercase drop-shadow-md">{levelData.num}</span>
+                       <h2 className="text-xl font-black text-white mt-0.5 drop-shadow-lg">{levelData.name}</h2>
                     </div>
                  </div>
 
@@ -198,25 +258,36 @@ export default function Dashboard() {
                      const zigZagPattern = [0, 40, 80, 40, 0, -40, -80, -40]; // Pixel offsets
                      const translateX = zigZagPattern[globalLessonIndex % zigZagPattern.length];
                      
-                     const nodeRef = isActive ? mascotRef : null;
+                     const setRefs = (el: HTMLDivElement | null) => {
+                       if (isActive) mascotRef.current = el;
+                       if (isSelected) selectedNodeRef.current = el;
+                     };
 
                      const renderedNode = (
                        <div 
                          key={lesson.id} 
-                         ref={nodeRef}
+                         ref={setRefs}
                          onClick={() => setSelectedLessonId(lesson.id)}
-                         className={`flex flex-col items-center relative transition-transform duration-500 cursor-pointer ${isSelected ? 'mb-40' : 'mb-8'}`}
+                         className="flex flex-col items-center relative transition-transform duration-500 cursor-pointer mb-8"
                          style={{ transform: `translateX(${translateX}px)` }}
                        >
+
                           {/* COMPLETED NODE */}
                           {isCompleted && (
                             <div className="relative flex items-center justify-center group z-10">
-                               <div className="w-[100px] h-[60px] bg-gradient-to-b from-[#fde047] to-[#ca8a04] rounded-[50%] border-t border-t-white/60 border-b-8 border-[#854d0e] shadow-[0_15px_25px_rgba(0,0,0,0.6),_inset_0_-4px_10px_rgba(0,0,0,0.3)] flex items-center justify-center transform group-active:scale-95 transition-transform group-hover:brightness-110">
-                                  <div className="w-8 h-8 rounded-full bg-white/30 border-2 border-white/60 flex items-center justify-center shadow-inner">
-                                     <Check size={20} className="text-white drop-shadow-md" strokeWidth={4} />
+                               {/* ROTATING GOLD RING */}
+                               {isSelected && (
+                                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
+                                     <div className="w-[120px] h-[120px] rounded-full border-[3px] border-transparent border-t-yellow-400 border-r-yellow-500 animate-[spin_3s_linear_infinite] shadow-[0_0_15px_rgba(250,204,21,0.5)] transform scale-y-[0.57] opacity-90"></div>
+                                  </div>
+                               )}
+                               <div className="relative w-[110px] h-[65px] bg-gradient-to-b from-[#fef08a] to-[#eab308] rounded-[50%] border-t-[2px] border-t-yellow-100 border-b-[10px] border-[#a16207] shadow-[0_15px_30px_rgba(202,138,4,0.5),_inset_0_-2px_15px_rgba(0,0,0,0.2)] flex items-center justify-center transform group-active:scale-95 transition-transform group-hover:brightness-110 z-10">
+                                  {/* Raised Checkmark Center */}
+                                  <div className="w-[60px] h-[35px] bg-gradient-to-b from-[#fef08a] to-[#ca8a04] rounded-[50%] flex items-center justify-center shadow-[0_5px_10px_rgba(0,0,0,0.5),_inset_0_2px_5px_rgba(255,255,255,0.8)] border-b-[4px] border-[#854d0e] border-t border-yellow-200">
+                                     <Check size={20} className="text-[#653808] drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)]" strokeWidth={5} />
                                   </div>
                                </div>
-                               <div className="absolute left-[110px] whitespace-nowrap opacity-50 group-hover:opacity-100 transition-opacity">
+                               <div className="absolute left-[130px] whitespace-nowrap opacity-50 group-hover:opacity-100 transition-opacity z-20">
                                   <h3 className="font-bold text-neutral-400">{lesson.title}</h3>
                                </div>
                             </div>
@@ -224,42 +295,53 @@ export default function Dashboard() {
 
                           {/* LOCKED NODE */}
                           {isLocked && (
-                            <div className="relative flex items-center justify-center opacity-40 z-10">
-                               <div className="w-[80px] h-[48px] bg-gradient-to-b from-[#333] to-[#222] rounded-[50%] border-b-8 border-[#111] shadow-[0_10px_20px_rgba(0,0,0,0.5)] flex items-center justify-center">
-                                  <Lock size={16} className="text-neutral-500" />
+                            <div className="relative flex items-center justify-center opacity-60 z-10 group mt-2">
+                               {/* ROTATING GOLD RING */}
+                               {isSelected && (
+                                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
+                                     <div className="w-[100px] h-[100px] rounded-full border-[3px] border-transparent border-t-yellow-400 border-r-yellow-500 animate-[spin_3s_linear_infinite] shadow-[0_0_15px_rgba(250,204,21,0.5)] transform scale-y-[0.57] opacity-90"></div>
+                                  </div>
+                               )}
+                               <div className="relative w-[80px] h-[48px] bg-gradient-to-b from-[#444] to-[#222] rounded-[50%] border-t-[2px] border-t-neutral-500 border-b-8 border-[#111] shadow-[0_10px_20px_rgba(0,0,0,0.8),_inset_0_-2px_10px_rgba(0,0,0,0.5)] flex items-center justify-center transform group-active:scale-95 transition-transform group-hover:brightness-110 z-10">
+                                  <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-neutral-600 to-neutral-800 border border-neutral-500 flex items-center justify-center shadow-inner">
+                                     <Lock size={14} className="text-neutral-400 drop-shadow-md" />
+                                  </div>
+                               </div>
+                               <div className="absolute left-[110px] whitespace-nowrap opacity-50 group-hover:opacity-100 transition-opacity z-20">
+                                  <h3 className="font-bold text-neutral-500">{lesson.title}</h3>
                                </div>
                             </div>
                           )}
 
                           {/* ACTIVE NODE */}
                           {isActive && (
-                            <div className="relative flex flex-col items-center justify-center mt-4 z-20">
+                            <div className="relative flex items-center justify-center mt-4 z-20 group">
+                               {/* ROTATING GOLD RING */}
+                               {isSelected && (
+                                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
+                                     <div className="w-[160px] h-[160px] rounded-full border-[3px] border-transparent border-t-yellow-400 border-r-yellow-500 animate-[spin_3s_linear_infinite] shadow-[0_0_15px_rgba(250,204,21,0.5)] transform scale-y-[0.57] opacity-90"></div>
+                                  </div>
+                               )}
                                {/* Massive Glow */}
                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] bg-yellow-500/20 rounded-full blur-[50px] pointer-events-none"></div>
                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120px] h-[120px] bg-yellow-400/40 rounded-full blur-[20px] pointer-events-none"></div>
                                
                                {/* The Glowing Platform */}
-                               <div className="relative w-[130px] h-[75px] bg-gradient-to-b from-[#fef08a] to-[#eab308] rounded-[50%] border-b-8 border-[#a16207] shadow-[0_10px_40px_rgba(234,179,8,0.6),_inset_0_-4px_15px_rgba(0,0,0,0.3)] flex items-center justify-center">
+                               <div className="relative w-[130px] h-[75px] bg-gradient-to-b from-[#fef08a] to-[#eab308] rounded-[50%] border-b-8 border-[#a16207] shadow-[0_10px_40px_rgba(234,179,8,0.6),_inset_0_-4px_15px_rgba(0,0,0,0.3)] flex items-center justify-center z-10">
                                   {/* Center pure light */}
                                   <div className="w-[70px] h-[35px] bg-white rounded-[50%] blur-[4px]"></div>
                                   
                                   {/* Floating Mascot */}
-                                  <div className="absolute -top-[60px] animate-bounce">
-                                     <Mascot state="path_idle" size="scale-[0.3]" />
+                                  <div className="absolute -top-[90px] animate-bounce pointer-events-none">
+                                     <Mascot state="path_idle" size="scale-[0.5]" />
                                   </div>
                                </div>
+                               
+                               {/* Active Node Text */}
+                               <div className="absolute left-[160px] whitespace-nowrap opacity-80 group-hover:opacity-100 transition-opacity z-20">
+                                  <h3 className="font-bold text-white text-lg drop-shadow-md">{lesson.title}</h3>
+                               </div>
                             </div>
-                          )}
-
-                          {/* SELECTED ACTIVE CARD (Floating below node) */}
-                          {isSelected && (
-                             <div className="absolute top-[120px] w-[340px] bg-[#1A1A1A] p-6 rounded-[2rem] border border-neutral-700 shadow-[0_20px_50px_rgba(0,0,0,0.8),_0_0_60px_rgba(234,179,8,0.2)] border-t-[6px] border-t-yellow-500/80 flex flex-col items-center z-30 cursor-default animate-in fade-in slide-in-from-top-4" onClick={(e) => e.stopPropagation()}>
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-2 bg-yellow-500 blur-md opacity-50"></div>
-                                <h3 className="text-xl font-black text-white mb-6 text-center">{lesson.title}</h3>
-                                <Link to={`/lesson/${lesson.id}`} className="w-full py-4 bg-[#eab308] text-black font-black text-xl rounded-full hover:bg-yellow-400 active:scale-95 transition-all shadow-[0_0_30px_rgba(234,179,8,0.4)] flex items-center justify-center">
-                                   {isActive ? 'Start' : (isCompleted ? 'Practice' : 'Jump')}
-                                </Link>
-                             </div>
                           )}
                        </div>
                      );
@@ -276,10 +358,27 @@ export default function Dashboard() {
         {/* Floating Jump Here Button */}
         <button 
           onClick={scrollToCurrent} 
-          className={`fixed bottom-8 right-8 z-50 w-16 h-16 bg-[#1A1A1A] border-2 border-neutral-700 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center justify-center text-neutral-400 hover:text-white hover:border-neutral-500 hover:bg-[#222] active:scale-95 transition-all duration-500 ${isMascotVisible ? 'translate-y-32 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
+          className={`fixed bottom-8 right-8 z-50 w-16 h-16 bg-[#1A1A1A] border-2 border-neutral-700 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center justify-center text-neutral-400 hover:text-white hover:border-neutral-500 hover:bg-[#222] active:scale-95 transition-all duration-500 ${!showJumpArrow ? 'translate-y-32 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
         >
           <ArrowUp size={28} strokeWidth={3} />
         </button>
+
+        {/* FIXED BOTTOM CARD */}
+        {selectedLessonData && (
+          <div 
+            className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-40 w-[90%] max-w-sm bg-[#1A1A1A] p-6 rounded-[2rem] border-x border-x-neutral-700 border-b border-b-neutral-800 flex flex-col items-center transition-all duration-500 overflow-hidden ${cardBorderClass} ${!isCardVisible ? 'translate-y-40 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Ánh sáng chiếu từ dưới lên (Bottom Glow) */}
+            <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-32 bg-gradient-to-t ${isLockedSelection ? 'from-white/5' : 'from-yellow-500/10'} to-transparent pointer-events-none`}></div>
+            <div className={`absolute -bottom-8 left-1/2 -translate-x-1/2 w-full h-16 ${isLockedSelection ? 'bg-white/10' : 'bg-yellow-500/30'} blur-2xl pointer-events-none`}></div>
+            
+            <h3 className="text-xl font-black text-white mb-6 text-center relative z-10">{selectedLessonData.title}</h3>
+            <Link to={`/lesson/${selectedLessonData.id}`} className={`w-full py-4 font-black text-xl rounded-full active:scale-95 transition-all flex items-center justify-center relative z-10 ${isLockedSelection ? 'bg-[#222] text-white hover:bg-[#333] border border-neutral-700' : 'bg-[#eab308] text-black hover:bg-yellow-400 shadow-[0_0_30px_rgba(234,179,8,0.4)]'}`}>
+               {selectedLessonId === ACTIVE_LESSON_ID ? 'Start' : (selectedLessonId < ACTIVE_LESSON_ID ? 'Practice' : 'Jump')}
+            </Link>
+          </div>
+        )}
 
       </div>
     );
@@ -288,15 +387,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-sans selection:bg-yellow-500/30">
       <Header />
-      {/* Tabs */}
-      <div className="border-b border-neutral-800 bg-[#0A0A0A] flex justify-center sticky top-16 z-40">
-        <div className="flex gap-8">
-            <button onClick={() => setActiveTab('home')} className={`py-4 font-bold border-b-2 transition-colors ${activeTab === 'home' ? 'border-white text-white' : 'border-transparent text-neutral-400 hover:text-neutral-200'}`}>Home</button>
-            <button onClick={() => setActiveTab('courses')} className={`py-4 font-bold border-b-2 transition-colors ${activeTab === 'courses' ? 'border-white text-white' : 'border-transparent text-neutral-400 hover:text-neutral-200'}`}>Courses</button>
-        </div>
-      </div>
       <main>
-        {activeTab === 'home' ? renderHome() : renderCourses()}
+        {isHome ? renderHome() : renderCourses()}
       </main>
     </div>
   );

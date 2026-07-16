@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { X, Zap, Sparkles, RotateCcw, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { X, Zap, Sparkles, RotateCcw, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, Database } from 'lucide-react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import Mascot from '../components/Mascot';
 import LessonBottomBar from '../components/LessonBottomBar';
+import BuildDiagramInteractive from '../components/interactive/BuildDiagram';
+import HighlightDiagramInteractive from '../components/interactive/HighlightDiagram';
 import { ALL_LESSONS } from '../data/lessons';
 const PodiumSVG = () => (
   <svg viewBox="0 0 200 100" className="w-64 h-32 absolute bottom-0 left-1/2 -translate-x-1/2">
@@ -24,10 +26,12 @@ export default function LessonPlayer() {
   const [currentStep, setCurrentStep] = useState(0);
   const [xp, setXp] = useState(0);
   const [xpAddedAnim, setXpAddedAnim] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
   const [isStreakPopupOpen, setIsStreakPopupOpen] = useState(false);
   
   const [status, setStatus] = useState('idle'); 
   const [selectedOption, setSelectedOption] = useState<any>(null);
+  const [failedOptions, setFailedOptions] = useState<string[]>([]);
   const [hasViewedExplanation, setHasViewedExplanation] = useState(false);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,6 +56,8 @@ export default function LessonPlayer() {
     }
   }, [phase]);
 
+
+
   const handleSelect = (option: any) => {
     if (status === 'idle' || status === 'ready' || status === 'incorrect') {
       setSelectedOption(option);
@@ -72,6 +78,7 @@ export default function LessonPlayer() {
       }
     } else {
       setStatus(phase === 'skill_check' ? 'skill_check_incorrect' : 'incorrect');
+      setFailedOptions(prev => [...prev, selectedOption.id]);
     }
   };
 
@@ -92,13 +99,17 @@ export default function LessonPlayer() {
     setModalPage(0);
     setStatus('idle');
     setSelectedOption(null);
+    setFailedOptions([]);
     setHasViewedExplanation(false);
+    setActiveTab(0);
+
+    if (currentData.type === 'skill_check_transition') {
+      setPhase('transition');
+      setCurrentStep(prev => prev + 1);
+      return;
+    }
 
     if (currentStep < LESSON_DATA.length - 1) {
-      const nextData = LESSON_DATA[currentStep + 1];
-      if (nextData.type === 'skill_check') {
-        setPhase('transition');
-      }
       setCurrentStep(prev => prev + 1);
     } else {
       setPhase('complete');
@@ -127,7 +138,7 @@ export default function LessonPlayer() {
   `;
 
   return (
-    <div className="h-screen bg-[#000] text-white font-sans flex flex-col relative selection:bg-green-500/30 p-2 md:p-3">
+    <div className="h-screen overflow-hidden bg-[#000] text-white font-sans flex flex-col relative selection:bg-green-500/30 p-2 md:p-3">
       <style>{styles}</style>
 
       {/* --- OVERLAYS --- */}
@@ -197,7 +208,7 @@ export default function LessonPlayer() {
       )}
 
       {/* FRAME */}
-      <div className={`flex-1 rounded-[2rem] border-2 flex flex-col relative transition-all duration-300 bg-[#0a0a0a] mx-2 md:mx-6 mt-2 md:mt-4 mb-4 md:mb-8
+      <div className={`flex-1 overflow-hidden rounded-[2rem] border-2 flex flex-col relative transition-all duration-300 bg-[#0a0a0a] mx-2 md:mx-6 mt-2 md:mt-4 mb-4 md:mb-8
           ${(status === 'incorrect' || status === 'skill_check_incorrect') ? 'border-[#ca8a04] animate-[shakeScreen_0.4s_ease-in-out]' : ''}
           ${status === 'correct' ? 'border-[#4ADE80] shadow-[0_0_40px_rgba(74,222,128,0.15)]' : ''}
           ${(status === 'idle' || status === 'ready' || status === 'showing_answer') ? 'border-neutral-800' : ''}
@@ -208,37 +219,114 @@ export default function LessonPlayer() {
         <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col">
         
         {phase === 'complete' && (
-          <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-700">
-             <div className="relative w-64 h-64 flex items-center justify-center mb-8">
+          <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-700 w-full max-w-lg mx-auto">
+             <div className="relative w-64 h-64 flex items-center justify-center mb-4">
                 <div className="absolute -top-32 w-[200%] h-64 bg-gradient-to-b from-white/20 to-transparent blur-2xl clip-path-polygon-[20%_0,80%_0,100%_100%,0_100%]"></div>
                 <div className="absolute top-0 z-10">
                   <Mascot state="lesson_complete" size="scale-125" />
                 </div>
                 <PodiumSVG />
              </div>
-             <h1 className="text-3xl font-black mb-2">Lesson complete!</h1>
-             <p className="text-neutral-400 text-sm font-bold tracking-widest uppercase mb-1">Total XP</p>
-             <div className="flex items-center gap-2 text-5xl font-black text-white">
-                {xp} <Zap size={40} className="text-yellow-500" fill="currentColor" />
+             
+             <h1 className="text-4xl font-black mb-6 text-white drop-shadow-md">Hoàn thành bài học!</h1>
+             
+             {/* XP Ranking Card */}
+             <div className="w-full bg-[#1A1A1A] p-8 rounded-[2rem] border border-neutral-800 shadow-2xl relative overflow-hidden flex flex-col items-center">
+                <p className="text-neutral-400 text-sm font-bold tracking-widest uppercase mb-4">Tổng Kinh Nghiệm</p>
+                <div className="flex items-center gap-3 text-6xl font-black text-white mb-8 drop-shadow-[0_0_20px_rgba(250,204,21,0.5)]">
+                   <Zap size={48} className="text-yellow-400" fill="currentColor" />
+                   {xp}
+                </div>
+                
+                {/* Ranking Progress Bar */}
+                <div className="w-full flex flex-col gap-2 relative">
+                   <div className="flex justify-between text-xs font-bold text-neutral-500 uppercase tracking-wider px-2">
+                     <span>Đồng (0)</span>
+                     <span className={xp >= 40 ? 'text-blue-400' : ''}>Bạc (40)</span>
+                     <span className={xp >= 80 ? 'text-yellow-400' : ''}>Vàng (80)</span>
+                   </div>
+                   <div className="w-full h-4 bg-neutral-800 rounded-full overflow-hidden relative border border-neutral-700 shadow-inner">
+                      <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-400 to-blue-500 transition-all duration-1000 ease-out" style={{ width: `${Math.min((xp / 80) * 100, 100)}%` }}></div>
+                   </div>
+                </div>
+                
+                {/* Rank Up Celebration Overlay */}
+                {xp >= 40 && (
+                   <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center animate-in fade-in duration-500" onClick={(e) => (e.currentTarget.style.display = 'none')}>
+                      <div className="w-32 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(59,130,246,0.8)] border-4 border-blue-200 animate-bounce">
+                         <div className="text-4xl font-black text-white">BẠC</div>
+                      </div>
+                      <h2 className="text-3xl font-black text-white mt-6 drop-shadow-lg text-center leading-tight">THĂNG HẠNG!</h2>
+                      <p className="text-blue-200 font-medium mt-2">Bạn đã xuất sắc vượt mốc 40 XP</p>
+                      <p className="text-neutral-500 text-sm mt-4 animate-pulse">(Click để tắt)</p>
+                   </div>
+                )}
              </div>
+             
+             <Link to="/" className="mt-8 w-full py-4 bg-[#eab308] text-black font-black text-xl rounded-full hover:bg-yellow-400 active:scale-95 transition-all shadow-[0_0_30px_rgba(234,179,8,0.4)] flex items-center justify-center">
+                Tiếp tục
+             </Link>
           </div>
         )}
 
         {(phase === 'learning' || phase === 'skill_check') && currentData && (
           <div className="flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h1 className="text-2xl font-bold mb-8 text-center">{currentData.title}</h1>
+            {currentData.question && <h1 className="text-2xl md:text-3xl font-bold mb-8 text-center text-white leading-tight px-4">{currentData.question}</h1>}
+            {!currentData.question && currentData.title && <h1 className="text-2xl font-bold mb-8 text-center">{currentData.title}</h1>}
             {currentData.subtitle && <p className="text-neutral-400 text-center mb-8">{currentData.subtitle}</p>}
             
             <div className="flex-1 flex flex-col items-center justify-center relative w-full mb-8">
                {currentData.type === 'theory' && currentData.image}
 
+               {currentData.type === 'info_tabs' && currentData.tabs && (
+                 <div className="w-full flex flex-col gap-4">
+                    <div className="flex bg-[#1A1A1A] p-1 rounded-full border border-neutral-800">
+                       {currentData.tabs.map((tab: any, idx: number) => (
+                         <button key={idx} onClick={() => setActiveTab(idx)} className={`flex-1 py-2 rounded-full font-bold text-sm transition-all ${activeTab === idx ? 'bg-yellow-500 text-black shadow-md' : 'text-neutral-500 hover:text-white'}`}>
+                            {tab.tabTitle}
+                         </button>
+                       ))}
+                    </div>
+                    <div className="bg-[#1A1A1A] p-8 rounded-3xl border border-neutral-800 flex flex-col items-center min-h-[300px] justify-center animate-in fade-in slide-in-from-bottom-2">
+                       {/* Mock Image Placeholder */}
+                       <div className="w-40 h-40 bg-neutral-800 rounded-full mb-6 flex items-center justify-center border-4 border-neutral-700 shadow-inner relative">
+                          {currentData.tabs[activeTab].image === 'box' && <div className="w-20 h-20 bg-blue-500 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.5)]"></div>}
+                          {currentData.tabs[activeTab].image === 'actor' && <div className="w-12 h-12 bg-yellow-400 rounded-full shadow-[0_0_20px_rgba(250,204,21,0.5)]"></div>}
+                          {currentData.tabs[activeTab].image === 'rule' && <AlertCircle size={64} className="text-orange-500" />}
+                          {currentData.tabs[activeTab].image === 'api' && <Database size={64} className="text-purple-500" />}
+                          {currentData.tabs[activeTab].image === 'budget' && <div className="text-5xl">💰</div>}
+                          {!currentData.tabs[activeTab].image && <Sparkles size={64} className="text-yellow-500" />}
+                       </div>
+                       <p className="text-xl text-center leading-relaxed text-neutral-300 font-medium">
+                         {currentData.tabs[activeTab].content}
+                       </p>
+                    </div>
+                 </div>
+               )}
+
+               {currentData.type === 'skill_check_transition' && (
+                 <div className="w-full flex flex-col items-center justify-center gap-6 mt-10">
+                    <div className="w-32 h-32 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(250,204,21,0.5)] border-4 border-yellow-200">
+                       <Zap size={60} className="text-yellow-900 fill-yellow-900" />
+                    </div>
+                    <p className="text-2xl text-center font-black text-white max-w-md drop-shadow-md">
+                       {currentData.subtitle}
+                    </p>
+                 </div>
+               )}
+
                {currentData.interactionType === 'selection' && currentData.options && (
                  <div className="w-full flex flex-col gap-3">
                    {currentData.options.map((opt: any) => {
                      const isSelected = selectedOption?.id === opt.id;
+                     const isCurrentlyFailing = (status === 'incorrect' || status === 'skill_check_incorrect') && isSelected;
+                     const isFailed = failedOptions.includes(opt.id) && !isCurrentlyFailing;
+                     
                      let btnClass = "w-full p-5 rounded-2xl border-2 flex items-center gap-4 transition-all active:scale-[0.98] cursor-pointer bg-[#1A1A1A] ";
                      
-                     if (status === 'idle' || status === 'ready') {
+                     if (isFailed) {
+                       btnClass += "border-neutral-800 bg-neutral-900 opacity-40 cursor-not-allowed";
+                     } else if (status === 'idle' || status === 'ready') {
                        btnClass += isSelected ? "border-white bg-[#222]" : "border-neutral-700 hover:border-neutral-500";
                      } else if (phase === 'skill_check') {
                        if (isSelected && status === 'correct') btnClass += "border-green-500 bg-green-500/10";
@@ -256,9 +344,9 @@ export default function LessonPlayer() {
                      }
 
                      return (
-                       <button key={opt.id} onClick={() => handleSelect(opt)} className={btnClass} disabled={status === 'correct' || status === 'showing_answer' || status === 'skill_check_incorrect'}>
-                         {opt.icon && <span className="text-2xl">{opt.icon}</span>}
-                         <span className="font-bold text-lg flex-1 text-left">{opt.label}</span>
+                       <button key={opt.id} onClick={() => handleSelect(opt)} className={btnClass} disabled={status === 'correct' || status === 'showing_answer' || status === 'skill_check_incorrect' || isFailed}>
+                         {isFailed ? <X className="text-red-500" /> : opt.icon && <span className="text-2xl">{opt.icon}</span>}
+                         <span className={`font-bold text-lg flex-1 text-left ${isFailed ? 'line-through text-neutral-500' : ''}`}>{opt.label}</span>
                          {(status === 'correct' || status === 'showing_answer') && opt.isCorrect && isSelected && <CheckCircle2 className="text-green-500" />}
                          {status === 'incorrect' && !opt.isCorrect && isSelected && <AlertCircle className="text-orange-500" />}
                          {status === 'skill_check_incorrect' && isSelected && <AlertCircle className="text-red-500" />}
@@ -267,6 +355,60 @@ export default function LessonPlayer() {
                      );
                    })}
                  </div>
+               )}
+
+               {currentData.interactionType === 'sorting' && currentData.options && (
+                 <div className="w-full flex flex-col gap-6 items-center">
+                    {/* The Target Item to Sort */}
+                    <div className={`px-8 py-6 rounded-2xl text-2xl font-black shadow-xl mb-4 transition-all duration-500 border-b-4 ${status === 'correct' ? 'bg-green-500/20 text-green-400 border-green-500/50' : (status === 'incorrect' || status === 'skill_check_incorrect' ? 'bg-red-500/20 text-red-400 border-red-500/50' : 'bg-neutral-800 text-white border-neutral-700')} `}>
+                       {currentData.targetItem}
+                    </div>
+                    
+                    <div className="w-full grid grid-cols-2 gap-4">
+                       {currentData.options.map((opt: any) => {
+                         const isSelected = selectedOption?.id === opt.id;
+                         const isCurrentlyFailing = (status === 'incorrect' || status === 'skill_check_incorrect') && isSelected;
+                         const isFailed = failedOptions.includes(opt.id) && !isCurrentlyFailing;
+
+                         let boxClass = "flex-1 p-8 rounded-3xl border-4 flex flex-col items-center justify-center gap-4 transition-all cursor-pointer active:scale-95 bg-[#111] relative ";
+                         
+                         if (isFailed) {
+                           boxClass += "border-neutral-800 bg-neutral-900 opacity-40 cursor-not-allowed";
+                         } else if (status === 'idle' || status === 'ready') {
+                           boxClass += isSelected ? "border-yellow-500 shadow-[0_0_30px_rgba(250,204,21,0.3)] bg-[#1A1A1A]" : "border-neutral-800 hover:border-neutral-600 border-dashed";
+                         } else if (phase === 'skill_check') {
+                           if (isSelected && status === 'correct') boxClass += "border-green-500 bg-green-500/10";
+                           else if (status === 'skill_check_incorrect') {
+                             if (isSelected) boxClass += "border-red-500 bg-red-500/10";
+                             else if (opt.isCorrect) boxClass += "border-green-500 bg-green-500/10";
+                             else boxClass += "border-neutral-800 opacity-50";
+                           } else boxClass += "border-neutral-800 opacity-50";
+                         } else {
+                           if (isSelected && status === 'correct') boxClass += "border-green-500 bg-green-500/10";
+                           else if (isSelected && status === 'incorrect') boxClass += "border-orange-500 bg-orange-500/10";
+                           else if (status === 'showing_answer' && opt.isCorrect) boxClass += "border-white bg-white/10";
+                           else boxClass += "border-neutral-800 opacity-50";
+                         }
+
+                         return (
+                           <div key={opt.id} onClick={() => { if(!isFailed) handleSelect(opt) }} className={boxClass} style={{ pointerEvents: (status === 'idle' || status === 'ready') && !isFailed ? 'auto' : 'none' }}>
+                             {isFailed ? <X size={64} className="text-red-500/50 mb-2" /> : (opt.id.includes('in') ? <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-xl flex items-center justify-center bg-blue-500/10"><CheckCircle2 className="text-blue-500 opacity-50"/></div> : <div className="w-12 h-12 rounded-full bg-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]"></div>)}
+                             <span className={`font-bold text-xl text-center ${isFailed ? 'line-through text-neutral-500' : ''}`}>{opt.label}</span>
+                             {(status === 'correct' || status === 'showing_answer') && opt.isCorrect && isSelected && <div className="absolute -top-3 -right-3 bg-green-500 rounded-full p-1 text-white shadow-lg"><CheckCircle2 size={24} /></div>}
+                             {status === 'incorrect' && !opt.isCorrect && isSelected && <div className="absolute -top-3 -right-3 bg-orange-500 rounded-full p-1 text-white shadow-lg"><AlertCircle size={24} /></div>}
+                             {status === 'skill_check_incorrect' && isSelected && <div className="absolute -top-3 -right-3 bg-red-500 rounded-full p-1 text-white shadow-lg"><AlertCircle size={24} /></div>}
+                           </div>
+                         );
+                       })}
+                    </div>
+                 </div>
+               )}
+               {currentData.interactionType === 'build_diagram' && (
+                 <BuildDiagramInteractive data={currentData} status={status} onComplete={handleSelect} />
+               )}
+
+               {currentData.interactionType === 'highlight_diagram' && (
+                 <HighlightDiagramInteractive data={currentData} status={status} onComplete={handleSelect} />
                )}
 
                {currentData.type === 'interactive' && status !== 'idle' && status !== 'correct' && status !== 'showing_answer' && (
@@ -287,7 +429,7 @@ export default function LessonPlayer() {
             <LessonBottomBar
               phase={phase}
               status={status}
-              isTheory={currentData?.type === 'theory'}
+              isTheory={currentData?.type === 'theory' || currentData?.type === 'info_tabs' || currentData?.type === 'skill_check_transition'}
               hasExplanation={!!currentData?.explanation}
               hint={selectedOption?.hint}
               isModalOpen={isModalOpen}
@@ -309,7 +451,7 @@ export default function LessonPlayer() {
           <div className="bg-[#1A1A1A] w-full max-w-lg rounded-3xl border border-neutral-800 shadow-2xl overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between p-6 pb-2">
               <h3 className="text-xl font-bold">Explanation</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-neutral-500 hover:text-white">
+              <button onClick={() => { setIsModalOpen(false); setHasViewedExplanation(true); }} className="text-neutral-500 hover:text-white">
                 <X size={20} />
               </button>
             </div>

@@ -11,12 +11,20 @@ export default function Header() {
           </Link>
           <nav className="hidden md:flex gap-6 h-full items-center">
             <NavLink 
+              to="/home" 
+              className={({ isActive }) => 
+                `h-full font-bold flex items-center border-b-4 transition-colors ${isActive ? 'border-white text-white' : 'border-transparent text-neutral-400 hover:text-neutral-200'}`
+              }
+            >
+              Home
+            </NavLink>
+            <NavLink 
               to="/" 
               className={({ isActive }) => 
                 `h-full font-bold flex items-center border-b-4 transition-colors ${isActive ? 'border-white text-white' : 'border-transparent text-neutral-400 hover:text-neutral-200'}`
               }
             >
-              Dashboard
+              Courses
             </NavLink>
             <div className="relative group h-full flex items-center">
               <span className="font-bold text-neutral-400 cursor-pointer hover:text-neutral-200 h-full flex items-center border-b-4 border-transparent">
