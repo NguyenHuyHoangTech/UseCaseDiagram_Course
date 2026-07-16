@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+
+@layer utilities {
+  /* Lơ lửng (Hovering) */
+  @keyframes levitate {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+  @keyframes shadow-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(0.85); opacity: 0.15; }
+  }
+
+  /* Vào bài học (Drop & Squish) */
+  @keyframes drop-in {
+    0% { transform: translateY(-300px) scale(0.8, 1.2); opacity: 0; }
+    60% { transform: translateY(20px) scale(1.1, 0.8); opacity: 1; }
+    80% { transform: translateY(-10px) scale(0.95, 1.05); }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  /* Trả lời đúng (Happy Spin & Jump) */
+  @keyframes happy-jump {
+    0%, 100% { transform: translateY(0) scale(1); }
+    40% { transform: translateY(-30px) scale(0.9, 1.1); }
+    60% { transform: translateY(0) scale(1.1, 0.9); }
+    80% { transform: translateY(-10px) scale(0.95, 1.05); }
+  }
+
+  /* Tay mời gọi và Vẫy tay rõ ràng */
+  @keyframes beckon-hand {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes wave-hello {
+    0%, 100% { transform: translate(-5px, -20px); }
+    50% { transform: translate(15px, -20px); }
+  }
+
+  /* Hiển thị Hint (Thinking/Pop) */
+  @keyframes hint-pop {
+    0% { transform: rotate(0); }
+    20% { transform: rotate(-10deg) scale(1.05); }
+    40% { transform: rotate(8deg) scale(1.05); }
+    60% { transform: rotate(-4deg) scale(1); }
+    100% { transform: rotate(0); }
+  }
+  @keyframes lightbulb-pop {
+    0% { transform: scale(0) translateY(10px) rotate(-10deg); opacity: 0; }
+    70% { transform: scale(1.2) translateY(-20px) rotate(10deg); opacity: 1; }
+    100% { transform: scale(1) translateY(-15px) rotate(0); opacity: 1; }
+  }
+
+  /* Chuyển Skill Check (Morph & Energy) */
+  @keyframes energy-gather {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(0.95); filter: brightness(1.3); }
+    100% { transform: scale(1.05); filter: brightness(1.1); }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(2.8); opacity: 0; }
+  }
+
+  /* Hoàn thành bài học (Victory) */
+  @keyframes victory-dance {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    25% { transform: translateY(-20px) rotate(-10deg); }
+    50% { transform: translateY(0) rotate(0); }
+    75% { transform: translateY(-20px) rotate(10deg); }
+  }
+
+  /* Trượt / Thất bại (Heavy & Sad) */
+  @keyframes drop-heavy {
+    0% { transform: translateY(-40px); opacity: 0; }
+    20% { transform: translateY(0); opacity: 1; }
+    30% { transform: scale(1.15, 0.8) translateY(5px); }
+    100% { transform: scale(1.02, 0.95) translateY(2px); filter: grayscale(0.5); }
+  }
+  @keyframes sweat-drop {
+    0% { transform: translateY(0) scale(0); opacity: 0; }
+    50% { transform: translateY(10px) scale(1); opacity: 1; }
+    100% { transform: translateY(20px) scale(0); opacity: 0; }
+  }
+
+  /* Nhấp nháy mắt (Blink) */
+  @keyframes blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    96% { transform: scaleY(0.1); }
+  }
+
+  /* --- NEW ANIMATIONS --- */
+  @keyframes eye-shift {
+    0%, 100% { transform: translate(0, 0); }
+    15%, 35% { transform: translate(-3px, 2px); } /* Nhìn xuống trái */
+    45%, 65% { transform: translate(4px, -2px); } /* Nhìn lên phải */
+    75%, 90% { transform: translate(-2px, -3px); } /* Nhìn lên trái */
+  }
+  @keyframes chin-tap {
+    0%, 100% { transform: translate(-15px, -8px); }
+    50% { transform: translate(-15px, -12px); }
+  }
+  /* --- END NEW ANIMATIONS --- */
+
+  /* Hiệu ứng Phụ (Props) */
+  @keyframes wave-hand {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-40deg); }
+  }
+  @keyframes float-up {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    50% { transform: translateY(-30px) scale(1); opacity: 1; }
+    100% { transform: translateY(-60px) scale(1.2); opacity: 0; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px) rotate(-2deg); }
+    75% { transform: translateX(4px) rotate(2deg); }
+  }
+}
