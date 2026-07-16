@@ -1,4 +1,3 @@
-import React from 'react';
 
 // Cấu trúc các cặp mắt/miệng cực kỳ dễ thương
 const faces = {

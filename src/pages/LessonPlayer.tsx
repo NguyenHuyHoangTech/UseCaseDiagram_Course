@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Zap, Check, RotateCcw, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Zap, RotateCcw, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Mascot from '../components/Mascot';
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { RefreshCw, Sparkles } from 'lucide-react';
 import Mascot from '../components/Mascot';
 import Header from '../components/Header';

@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Play, Square, Plus, Link as LinkIcon, Settings, Database, Server, Minus, X, Trash2, Edit3, Save, Upload, AlertTriangle, FileText, MoveDiagonal } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Play, Square, Plus, Link as LinkIcon, Settings, Database, Server, Minus, Trash2, Edit3, Save, Upload, AlertTriangle, MoveDiagonal } from 'lucide-react';
 import Header from '../components/Header';
 
 const GRID_SIZE = 20; 
@@ -231,7 +231,7 @@ export default function TestMap360() {
     if (newNodeType === 'note') { w = 160; h = 80; isInternal = true; }
     
     const boundary = nodes.find(n => n.type === 'boundary') || { x: 280, y: 40, w: 540, h: 700 };
-    let spawnX, spawnY;
+    let spawnX = 0, spawnY = 0;
 
     if (!isInternal) {
       spawnX = snapToGrid(boundary.x - w - 60);
