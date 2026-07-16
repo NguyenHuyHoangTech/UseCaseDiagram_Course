@@ -195,6 +195,8 @@ export default function AdvancedLessonPlayer() {
   const [hasTried, setHasTried] = useState(false);
   const [xpAddedAnim, setXpAddedAnim] = useState<number | null>(null);
   const [isStreakPopupOpen, setIsStreakPopupOpen] = useState(false);
+  const [isQuitModalOpen, setIsQuitModalOpen] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   // Interactive States
   const [status, setStatus] = useState('idle'); // idle, ready, running, correct, incorrect, showing_answer, skill_check_incorrect
@@ -327,11 +329,25 @@ export default function AdvancedLessonPlayer() {
       const nextData = LESSON_DATA[stepIndex + 1];
       if (nextData.phase === 'skill_check' && currentData.phase === 'learning') {
         setGlobalPhase('skill_check_splash');
+      } else {
+        setIsTransitioning(true);
+        setTimeout(() => setIsTransitioning(false), 1000);
       }
       setStepIndex(p => p + 1);
     } else {
       setGlobalPhase('complete');
     }
+  };
+
+  const getMascotState = () => {
+    if (globalPhase === 'skill_check_splash') return 'skill_check';
+    if (globalPhase === 'complete') return 'lesson_complete';
+    if (isTransitioning) return 'entry';
+    
+    if (status === 'correct') return 'correct';
+    if (status === 'incorrect' || status === 'skill_check_incorrect') return 'shocked';
+    if (status === 'showing_answer') return 'explaining';
+    return 'path_idle';
   };
 
   const renderInteraction = () => {
@@ -871,7 +887,7 @@ export default function AdvancedLessonPlayer() {
         isModalOpen={isModalOpen}
         hasViewedExplanation={hasViewedExplanation}
         isLastStep={stepIndex === LESSON_DATA.length - 1}
-        mascotState={status === 'correct' ? 'correct' : status === 'incorrect' ? 'hint' : status === 'showing_answer' ? 'explaining' : 'path_idle'}
+        mascotState={getMascotState()}
         onCheck={handleCheck}
         onNext={handleNext}
         onTryAgain={() => { setStatus('idle'); setHasTried(true); }}
@@ -886,19 +902,13 @@ export default function AdvancedLessonPlayer() {
     @keyframes dropIn { 0% { transform: translateY(-100vh); opacity: 0; } 30% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(100vh); opacity: 0; } }
     @keyframes splashUp { 0% { transform: translateY(100vh) scale(0.5); opacity: 0; } 20% { transform: translateY(0) scale(1); opacity: 1; } 80% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
     @keyframes slideRight { 0% { left: 0; opacity: 1; } 50% { left: 50%; opacity: 1; } 100% { left: 100%; opacity: 0; } }
-    @keyframes floatUpFadeXP { 0% { opacity: 0; transform: translateY(10px) scale(0.8); } 20% { opacity: 1; transform: translateY(-5px) scale(1.1); } 80% { opacity: 1; transform: translateY(-15px) scale(1); } 100% { opacity: 0; transform: translateY(-25px) scale(0.9); } }
+    @keyframes floatDownFadeXP { 0% { opacity: 0; transform: translateY(-10px) scale(0.8); } 20% { opacity: 1; transform: translateY(5px) scale(1.1); } 80% { opacity: 1; transform: translateY(15px) scale(1); } 100% { opacity: 0; transform: translateY(25px) scale(0.9); } }
     @keyframes shakeScreen { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
   `;
 
   return (
     <div className="h-screen bg-[#000] text-white font-sans overflow-hidden flex flex-col relative selection:bg-green-500/30 p-2 md:p-3">
       <style>{styles}</style>
-      <div className={`flex-1 rounded-[2rem] border-2 flex flex-col relative overflow-hidden transition-all duration-300 bg-[#0a0a0a]
-          ${(status === 'incorrect' || status === 'skill_check_incorrect') ? 'border-[#ca8a04] animate-[shakeScreen_0.4s_ease-in-out]' : ''}
-          ${status === 'correct' ? 'border-[#4ADE80] shadow-[0_0_40px_rgba(74,222,128,0.15)]' : ''}
-          ${(status === 'idle' || status === 'ready' || status === 'showing_answer') ? 'border-neutral-800' : ''}
-      `}>
-
       {/* Intro Overlay */}
       {globalPhase === 'intro' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]">
@@ -919,24 +929,24 @@ export default function AdvancedLessonPlayer() {
         </div>
       )}
 
-      {/* Top Navigation Bar */}
+      {/* Top Navigation Bar (NOW OUTSIDE FRAME) */}
       {(globalPhase === 'lesson' || globalPhase === 'skill_check') && (
-        <header className="flex items-center justify-between px-4 py-4 z-40 relative max-w-5xl mx-auto w-full">
-          <button className="text-neutral-500 hover:text-white transition-colors"><X size={24} /></button>
+        <header className="flex items-center justify-center px-4 py-4 z-40 relative w-full shrink-0">
+          <button onClick={() => setIsQuitModalOpen(true)} className="absolute left-6 text-neutral-500 hover:text-white transition-colors"><X size={26} strokeWidth={3} /></button>
           
-          <div className="flex-1 mx-8 max-w-xl flex items-center h-2.5 bg-neutral-800 rounded-full overflow-hidden relative">
-            <div className="absolute top-0 left-0 h-full bg-green-500 transition-all duration-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" style={{ width: `${progressPercent}%` }}></div>
-            {LESSON_DATA.map((_, i) => <div key={i} className="flex-1 border-r-4 border-[#0A0A0A] h-full z-10 last:border-r-0"></div>)}
+          <div className="flex-1 mx-16 max-w-xl flex items-center h-3 bg-neutral-800 rounded-full overflow-hidden relative">
+            <div className="absolute top-0 left-0 h-full bg-[#4ADE80] transition-all duration-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" style={{ width: `${progressPercent}%` }}></div>
+            {LESSON_DATA.map((_, i) => <div key={i} className="flex-1 border-r-[4px] border-[#0a0a0a] h-full z-10 last:border-r-0"></div>)}
           </div>
 
-          <div className="flex items-center gap-5 font-bold text-lg text-neutral-300 relative">
+          <div className="absolute right-6 flex items-center gap-5 font-bold text-lg text-neutral-300">
             {/* XP Sparkles */}
             <div className="flex items-center gap-1.5 relative">
                <span className="animate-in slide-in-from-bottom-1 fade-in text-blue-100/90" key={xp}>{xp}</span>
                <Sparkles size={22} className="text-green-400" fill="currentColor" />
                
                {xpAddedAnim !== null && (
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-green-400 font-black text-xl pointer-events-none drop-shadow-[0_0_10px_rgba(74,222,128,0.8)] z-50 flex items-center whitespace-nowrap" style={{ animation: 'floatUpFadeXP 1.5s ease-out forwards' }}>
+                  <div className="absolute top-6 left-1/2 -translate-x-1/2 text-green-400 font-black text-xl pointer-events-none drop-shadow-[0_0_10px_rgba(74,222,128,0.8)] z-50 flex items-center whitespace-nowrap" style={{ animation: 'floatDownFadeXP 1.5s ease-out forwards' }}>
                      +{xpAddedAnim}
                   </div>
                )}
@@ -964,8 +974,15 @@ export default function AdvancedLessonPlayer() {
         </header>
       )}
 
+      {/* FRAME */}
+      <div className={`flex-1 rounded-[2rem] border-2 flex flex-col relative transition-all duration-300 bg-[#0a0a0a] mx-2 md:mx-6 mt-2 md:mt-4 mb-4 md:mb-8
+          ${(status === 'incorrect' || status === 'skill_check_incorrect') ? 'border-[#ca8a04] animate-[shakeScreen_0.4s_ease-in-out]' : ''}
+          ${status === 'correct' ? 'border-[#4ADE80] shadow-[0_0_40px_rgba(74,222,128,0.15)]' : ''}
+          ${(status === 'idle' || status === 'ready' || status === 'showing_answer') ? 'border-neutral-800' : ''}
+      `}>
+
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative max-w-3xl mx-auto w-full px-6 pt-4 pb-40 z-10 overflow-y-auto custom-scrollbar">
+      <main className="flex-1 flex flex-col relative max-w-3xl mx-auto w-full px-6 pt-10 md:pt-14 pb-40 z-10 overflow-y-auto custom-scrollbar">
         
         {/* Completion Screen */}
         {globalPhase === 'complete' && (
@@ -979,7 +996,6 @@ export default function AdvancedLessonPlayer() {
              <div className="flex items-center gap-2 text-6xl font-black text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                 {xp} <Zap size={44} className="text-yellow-500" fill="currentColor" />
              </div>
-             <button onClick={()=>window.location.reload()} className="mt-12 px-14 py-4 rounded-full font-black text-lg bg-white text-black hover:bg-neutral-200 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)]">Continue</button>
           </div>
         )}
 
@@ -992,7 +1008,7 @@ export default function AdvancedLessonPlayer() {
         )}
       </main>
 
-      {(globalPhase === 'lesson' || globalPhase === 'skill_check') && renderBottomBar()}
+      {(globalPhase === 'lesson' || globalPhase === 'skill_check' || globalPhase === 'complete') && renderBottomBar()}
       </div>
 
       {/* Explanation Modal */}
@@ -1015,6 +1031,18 @@ export default function AdvancedLessonPlayer() {
                 <button onClick={() => setModalPage(p => Math.min(currentData.explanation.length - 1, p + 1))} className={`p-2 rounded-full hover:bg-neutral-800 ${modalPage === currentData.explanation.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`} disabled={modalPage === currentData.explanation.length - 1}><ChevronRight size={24} /></button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Quit Modal */}
+      {isQuitModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-[#1f1f1f] w-full max-w-[400px] rounded-[2rem] p-8 pb-6 flex flex-col items-center shadow-2xl animate-in zoom-in-95 duration-200 border border-neutral-800">
+             <h3 className="text-2xl font-black text-white tracking-wide mb-2">Are you sure?</h3>
+             <p className="text-neutral-300 font-medium text-center mb-8">If you quit, you will lose your progress and XP.</p>
+             <button onClick={() => setIsQuitModalOpen(false)} className="w-full bg-[#E5E5E5] hover:bg-white text-black font-bold text-[17px] py-4 rounded-2xl mb-4 transition-colors shadow-[0_4px_0_#b3b3b3] active:translate-y-1 active:shadow-[0_0_0_#b3b3b3]">Keep learning</button>
+             <Link to="/dashboard" className="text-[#ff5b5b] font-bold text-lg hover:text-red-400 transition-colors uppercase tracking-widest pt-2">Quit</Link>
           </div>
         </div>
       )}

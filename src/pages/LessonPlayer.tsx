@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Zap, RotateCcw, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { X, Zap, Sparkles, RotateCcw, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Mascot from '../components/Mascot';
 import LessonBottomBar from '../components/LessonBottomBar';
@@ -94,6 +94,8 @@ export default function LessonPlayer() {
   const [phase, setPhase] = useState('intro_anim'); 
   const [currentStep, setCurrentStep] = useState(0);
   const [xp, setXp] = useState(0);
+  const [xpAddedAnim, setXpAddedAnim] = useState<number | null>(null);
+  const [isStreakPopupOpen, setIsStreakPopupOpen] = useState(false);
   
   const [status, setStatus] = useState('idle'); 
   const [selectedOption, setSelectedOption] = useState<any>(null);
@@ -127,7 +129,12 @@ export default function LessonPlayer() {
     
     if (selectedOption.isCorrect) {
       setStatus('correct');
-      if (status !== 'showing_answer') setXp(prev => prev + (phase === 'skill_check' ? 20 : 10));
+      if (status !== 'showing_answer') {
+        const added = phase === 'skill_check' ? 20 : 10;
+        setXp(prev => prev + added);
+        setXpAddedAnim(added);
+        setTimeout(() => setXpAddedAnim(null), 1000);
+      }
     } else {
       setStatus(phase === 'skill_check' ? 'skill_check_incorrect' : 'incorrect');
     }
@@ -172,22 +179,21 @@ export default function LessonPlayer() {
     return 'path_idle';
   };
 
+  const styles = `
+    @keyframes dropIn { 0% { transform: translateY(-100vh); opacity: 0; } 30% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(100vh); opacity: 0; } }
+    @keyframes splashUp { 0% { transform: translateY(100vh) scale(0.5); opacity: 0; } 20% { transform: translateY(0) scale(1); opacity: 1; } 80% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+    @keyframes shakeScreen { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+    @keyframes floatUpFadeXP {
+      0% { transform: translateY(0) scale(0.5); opacity: 0; }
+      20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+      80% { transform: translateY(-30px) scale(1); opacity: 1; }
+      100% { transform: translateY(-40px) scale(1); opacity: 0; }
+    }
+  `;
+
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white font-sans overflow-hidden flex flex-col relative selection:bg-green-500/30">
-      <style>{`
-        @keyframes dropIn {
-          0% { transform: translateY(-100vh); opacity: 0; }
-          30% { transform: translateY(0); opacity: 1; }
-          70% { transform: translateY(0); opacity: 1; }
-          100% { transform: translateY(100vh); opacity: 0; }
-        }
-        @keyframes splashUp {
-          0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
-          20% { transform: translateY(0) scale(1); opacity: 1; }
-          80% { transform: translateY(0) scale(1); opacity: 1; }
-          100% { transform: scale(1.5); opacity: 0; }
-        }
-      `}</style>
+    <div className="h-screen bg-[#000] text-white font-sans flex flex-col relative selection:bg-green-500/30 p-2 md:p-3">
+      <style>{styles}</style>
 
       {/* --- OVERLAYS --- */}
       {phase === 'intro_anim' && (
@@ -210,30 +216,61 @@ export default function LessonPlayer() {
         </div>
       )}
 
-      {/* --- TOP BAR --- */}
-      <header className="flex items-center justify-between px-4 py-4 z-40 relative bg-gradient-to-b from-[#0A0A0A] to-transparent">
-        <Link to="/" className="text-neutral-500 hover:text-white transition-colors">
-          <X size={24} />
-        </Link>
-        
-        <div className="flex-1 mx-8 max-w-xl flex items-center h-2 bg-neutral-800 rounded-full overflow-hidden relative">
-          <div 
-            className="absolute top-0 left-0 h-full bg-green-500 transition-all duration-500 ease-out"
-            style={{ width: `${progressPercent}%` }}
-          ></div>
-          {LESSON_DATA.map((_, i) => (
-             <div key={i} className="flex-1 border-r-4 border-[#0A0A0A] h-full z-10 last:border-r-0"></div>
-          ))}
-        </div>
+      {/* --- TOP NAVIGATION BAR (NOW OUTSIDE FRAME) --- */}
+      {(phase === 'learning' || phase === 'skill_check') && (
+        <header className="flex items-center justify-center px-4 py-4 z-40 relative w-full shrink-0">
+          <Link to="/" className="absolute left-6 text-neutral-500 hover:text-white transition-colors"><X size={26} strokeWidth={3} /></Link>
+          
+          <div className="flex-1 mx-16 max-w-xl flex items-center h-3 bg-neutral-800 rounded-full overflow-hidden relative">
+            <div className="absolute top-0 left-0 h-full bg-[#4ADE80] transition-all duration-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" style={{ width: `${progressPercent}%` }}></div>
+            {LESSON_DATA.map((_, i) => <div key={i} className="flex-1 border-r-[4px] border-[#0a0a0a] h-full z-10 last:border-r-0"></div>)}
+          </div>
 
-        <div className="flex items-center gap-1.5 font-bold text-neutral-300">
-          <span>{xp}</span>
-          <Zap size={20} className="text-yellow-500" fill="currentColor" />
-        </div>
-      </header>
+          <div className="absolute right-6 flex items-center gap-5 font-bold text-lg text-neutral-300">
+            {/* XP Sparkles */}
+            <div className="flex items-center gap-1.5 relative">
+               <span className="animate-in slide-in-from-bottom-1 fade-in text-blue-100/90" key={xp}>{xp}</span>
+               <Sparkles size={22} className="text-green-400" fill="currentColor" />
+               
+               {xpAddedAnim !== null && (
+                  <div className="absolute top-6 left-1/2 -translate-x-1/2 text-green-400 font-black text-xl pointer-events-none drop-shadow-[0_0_10px_rgba(74,222,128,0.8)] z-50 flex items-center whitespace-nowrap" style={{ animation: 'floatUpFadeXP 1.5s ease-out forwards' }}>
+                     +{xpAddedAnim}
+                  </div>
+               )}
+            </div>
+
+            {/* Streak Lightning */}
+            <div className="relative">
+               <button onClick={() => setIsStreakPopupOpen(!isStreakPopupOpen)} className="flex items-center hover:scale-110 active:scale-95 transition-transform">
+                  <Zap size={24} className="text-[#D9F93F]" fill="currentColor" stroke="none" />
+               </button>
+               
+               {isStreakPopupOpen && (
+                  <div className="absolute top-12 right-0 w-64 bg-[#222] border border-neutral-700 rounded-2xl p-5 shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 animate-in fade-in slide-in-from-top-2">
+                     <div className="absolute -top-2 right-2 w-4 h-4 rotate-45 bg-[#222] border-t border-l border-neutral-700"></div>
+                     <h3 className="text-xl font-bold text-white text-center mb-1">Nice work today!</h3>
+                     <p className="text-neutral-400 text-center mb-5 text-sm">Keep it up.</p>
+                     <div className="flex justify-center gap-2">
+                        <div className="bg-[#D9F93F] text-black px-1.5 py-1 rounded-sm"><Zap size={20} fill="currentColor" stroke="none" /></div>
+                        <div className="bg-[#D9F93F] text-black px-1.5 py-1 rounded-sm"><Zap size={20} fill="currentColor" stroke="none" /></div>
+                     </div>
+                  </div>
+               )}
+            </div>
+          </div>
+        </header>
+      )}
+
+      {/* FRAME */}
+      <div className={`flex-1 rounded-[2rem] border-2 flex flex-col relative transition-all duration-300 bg-[#0a0a0a] mx-2 md:mx-6 mt-2 md:mt-4 mb-4 md:mb-8
+          ${(status === 'incorrect' || status === 'skill_check_incorrect') ? 'border-[#ca8a04] animate-[shakeScreen_0.4s_ease-in-out]' : ''}
+          ${status === 'correct' ? 'border-[#4ADE80] shadow-[0_0_40px_rgba(74,222,128,0.15)]' : ''}
+          ${(status === 'idle' || status === 'ready' || status === 'showing_answer') ? 'border-neutral-800' : ''}
+      `}>
 
       {/* --- MAIN CONTENT AREA --- */}
-      <main className="flex-1 flex flex-col relative max-w-3xl mx-auto w-full px-6 pt-4 pb-32 z-10">
+      <main className="flex-1 flex flex-col relative overflow-y-auto w-full px-6 pt-10 md:pt-14 pb-32 z-10">
+        <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col">
         
         {phase === 'complete' && (
           <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-700">
@@ -305,25 +342,31 @@ export default function LessonPlayer() {
             </div>
           </div>
         )}
+        </div>
       </main>
+      </div> {/* End Frame */}
 
       {/* --- BOTTOM CONTROLS & MASCOT --- */}
-      <LessonBottomBar
-        phase={phase}
-        status={status}
-        isTheory={currentData?.type === 'theory'}
-        hasExplanation={!!currentData?.explanation}
-        hint={selectedOption?.hint}
-        isModalOpen={isModalOpen}
-        hasViewedExplanation={hasViewedExplanation}
-        isLastStep={currentStep === LESSON_DATA.length - 1}
-        mascotState={getMascotState()}
-        onCheck={handleCheck}
-        onNext={handleNext}
-        onTryAgain={handleTryAgain}
-        onSeeAnswer={handleSeeAnswer}
-        onOpenModal={() => setIsModalOpen(true)}
-      />
+      <div className="absolute inset-0 pointer-events-none p-2 md:p-3 flex flex-col z-50">
+         <div className="flex-1 relative mx-2 md:mx-6 mt-2 md:mt-4 mb-4 md:mb-8">
+            <LessonBottomBar
+              phase={phase}
+              status={status}
+              isTheory={currentData?.type === 'theory'}
+              hasExplanation={!!currentData?.explanation}
+              hint={selectedOption?.hint}
+              isModalOpen={isModalOpen}
+              hasViewedExplanation={hasViewedExplanation}
+              isLastStep={currentStep === LESSON_DATA.length - 1}
+              mascotState={getMascotState()}
+              onCheck={handleCheck}
+              onNext={handleNext}
+              onTryAgain={handleTryAgain}
+              onSeeAnswer={handleSeeAnswer}
+              onOpenModal={() => setIsModalOpen(true)}
+            />
+         </div>
+      </div>
 
       {/* --- EXPLANATION MODAL (Why?) --- */}
       {isModalOpen && currentData?.explanation && (

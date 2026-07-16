@@ -11,7 +11,7 @@ const faces = {
     <g className="animate-[blink_4s_infinite] origin-center">
       <circle cx="38" cy="48" r="8" fill="white" />
       <circle cx="62" cy="48" r="8" fill="white" />
-      <g>
+      <g className="animate-[eye-shift_8s_ease-in-out_infinite]">
         <circle cx="38" cy="48" r="4" fill="#111" />
         <circle cx="62" cy="48" r="4" fill="#111" />
         <circle cx="36.5" cy="46.5" r="1.5" fill="white" />
@@ -23,11 +23,23 @@ const faces = {
     </g>
   ),
   thinking_hard: (
-    <g>
-      <circle cx="38" cy="46" r="7" fill="white" />
-      <circle cx="40" cy="44" r="3" fill="#111" />
-      <path d="M57 48 Q62 43 67 48" stroke="white" strokeWidth="4.5" strokeLinecap="round" fill="none" />
-      <path d="M45 58 Q48 55 50 58 T55 58" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+    <g className="animate-[blink_4s_infinite]">
+      <circle cx="36" cy="46" r="7.5" fill="white" />
+      <circle cx="64" cy="46" r="7.5" fill="white" />
+      <g>
+         <circle cx="39" cy="44" r="3.5" fill="#111" />
+         <circle cx="67" cy="44" r="3.5" fill="#111" />
+         <circle cx="37.5" cy="42.5" r="1.2" fill="white" />
+         <circle cx="65.5" cy="42.5" r="1.2" fill="white" />
+      </g>
+      {/* Eyebrows - arched like curious/cute */}
+      <path d="M30 38 Q36 33 42 38" stroke="#111" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <path d="M58 38 Q64 33 70 38" stroke="#111" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      
+      <ellipse cx="22" cy="52" rx="4.5" ry="2" fill="#FF7EA5" opacity="0.4" />
+      <ellipse cx="78" cy="52" rx="4.5" ry="2" fill="#FF7EA5" opacity="0.4" />
+      {/* Cute "o" mouth */}
+      <circle cx="50" cy="54" r="2.5" fill="#111" />
     </g>
   ),
   observing: (
@@ -113,7 +125,7 @@ export const Mascot = ({ state = 'path_idle', className = '', size }: { state?: 
     path_idle: { grad: "green-grad", face: "shy_welcoming", anim: "animate-[levitate_4s_ease-in-out_infinite]", aura: "bg-green-500/10", leftHand: "animate-[beckon-hand_2.5s_infinite]", rightHand: "translate-y-2" },
     greeting: { grad: "green-grad", face: "happy", anim: "animate-[levitate_3s_ease-in-out_infinite]", aura: "bg-green-500/20", leftHand: "animate-[wave-hello_1s_infinite]", rightHand: "translate-y-0" },
     entry: { grad: "green-grad", face: "excited", anim: "animate-[drop-in_1s_cubic-bezier(0.34,1.56,0.64,1)_forwards]", aura: "bg-green-500/30", showSparkles: true, leftHand: "-translate-y-10", rightHand: "-translate-y-10" },
-    thinking: { grad: "blue-grad", face: "thinking_hard", anim: "animate-[levitate_3.5s_ease-in-out_infinite]", aura: "bg-blue-500/20", showQuestion: true, leftHand: "translate-y-0", rightHand: "animate-[chin-tap_2s_infinite]" },
+    thinking: { grad: "blue-grad", face: "thinking_hard", anim: "animate-[levitate_3.5s_ease-in-out_infinite]", aura: "bg-blue-500/20", showQuestion: false, leftHand: "translate-y-0", rightHand: "animate-[chin-tap_2s_infinite]" },
     corner_idle: { grad: "green-grad", face: "observing", anim: "animate-[levitate_5s_ease-in-out_infinite]", aura: "bg-green-500/10", size: "scale-75", leftHand: "translate-y-2", rightHand: "translate-y-2" },
     correct: { grad: "green-grad", face: "happy", anim: "animate-[happy-jump_1.2s_ease-in-out]", aura: "bg-green-400/50", showHearts: true, leftHand: "-translate-y-6", rightHand: "-translate-y-6" },
     hint: { grad: "yellow-grad", face: "wink", anim: "animate-[hint-pop_1s_ease-in-out_forwards]", aura: "bg-yellow-500/30", showBulb: true, leftHand: "translate-y-0", rightHand: "-translate-y-4" },

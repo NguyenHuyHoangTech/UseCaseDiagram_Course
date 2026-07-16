@@ -41,12 +41,17 @@ export default function LessonBottomBar({
   }
 
   return (
-    <div className="absolute bottom-0 left-0 w-full p-6 px-10 bg-gradient-to-t from-[#09090b] via-[#09090b] to-transparent z-40 flex items-end justify-between">
+    <div className={`absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a] to-transparent z-40 flex items-end justify-center pointer-events-none rounded-b-[1.8rem] transition-all duration-300
+      border-b-2 border-l-2 border-r-2
+      ${status === 'correct' ? 'border-[#4ADE80] shadow-[0_10px_40px_rgba(74,222,128,0.15)]' : ''}
+      ${(status === 'incorrect' || status === 'skill_check_incorrect') ? 'border-[#ca8a04]' : ''}
+      ${(status === 'idle' || status === 'ready' || status === 'showing_answer' || phase === 'complete') ? 'border-neutral-800' : ''}
+    `}>
       
       {/* Left Side: Mascot & Hints */}
-      <div className="flex items-end relative w-1/2 min-h-[80px]">
+      <div className="absolute bottom-0 left-0 flex items-end z-50 pointer-events-auto">
         {(phase === 'learning' || phase === 'lesson') && (
-          <div className="relative w-24 h-24 -mb-6 -ml-6 flex justify-center">
+          <div className="relative w-24 h-24 -mb-2 -ml-2 flex justify-center">
             <Mascot state={mascotState} size="scale-75" />
             
             {/* Floating Tooltips */}
@@ -68,7 +73,7 @@ export default function LessonBottomBar({
         )}
 
         {phase === 'skill_check' && status !== 'idle' && status !== 'ready' && (
-          <div className="flex items-center gap-3 mb-2 animate-in fade-in">
+          <div className="absolute bottom-6 left-6 flex items-center gap-3 animate-in fade-in whitespace-nowrap">
             {status === 'correct' ? (
               <><CheckCircle2 size={24} className="text-green-500" /> <span className="font-bold text-lg text-green-500">Correct</span></>
             ) : (
@@ -79,10 +84,9 @@ export default function LessonBottomBar({
       </div>
 
       {/* Right Side: Action Buttons */}
-      <div className={`flex items-center gap-3 w-1/2 justify-end ${phase === 'complete' ? 'w-full justify-center' : ''}`}>
-        
+      <div className="flex items-center gap-3 pointer-events-auto z-50 mb-2 w-full justify-center">
         {phase === 'complete' && (
-           <Link to="/" className="w-full max-w-sm bg-[#EEE] text-center text-black font-black text-lg py-4 rounded-full hover:bg-white active:scale-95 transition-all">
+           <Link to="/" className="w-full max-w-sm flex items-center justify-center py-4 rounded-full font-black text-lg bg-white text-black hover:bg-neutral-200 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)]">
              Continue
            </Link>
         )}
@@ -93,7 +97,7 @@ export default function LessonBottomBar({
           </button>
         )}
 
-        {!isTheory && (
+        {!isTheory && phase !== 'complete' && (
           <>
             {status === 'idle' && (
               <button disabled className="px-10 py-3.5 rounded-full font-black text-lg bg-[#222] text-neutral-500 cursor-not-allowed">
@@ -159,11 +163,11 @@ export default function LessonBottomBar({
             {status === 'skill_check_incorrect' && (
               <>
                 {hasExplanation && (
-                  <button onClick={onOpenModal} className="px-6 py-3.5 rounded-full font-bold text-[#AAA] hover:text-white bg-[#222] transition-colors">
+                  <button onClick={onOpenModal} className="px-6 py-3.5 rounded-full font-bold text-[#AAA] hover:text-white bg-[#222] transition-colors whitespace-nowrap">
                     Why?
                   </button>
                 )}
-                <button onClick={onNext} className="px-10 py-3.5 rounded-full font-black text-lg bg-[#222] text-white hover:bg-[#333] border border-neutral-700 active:scale-95 transition-all">
+                <button onClick={onNext} className="px-10 py-3.5 rounded-full font-black text-lg bg-[#333] text-white hover:bg-[#444] transition-colors whitespace-nowrap">
                   {isLastStep ? 'Finish' : 'Continue'}
                 </button>
               </>
