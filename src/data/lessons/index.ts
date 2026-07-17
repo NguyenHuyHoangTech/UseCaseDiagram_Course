@@ -106,64 +106,64 @@ export const LESSON_METADATA = [
   },
   {
     "id": 9,
-    "title": "Mắt xích bắt buộc (<<include>>)",
-    "subtitle": "Kịch bản bắt buộc.",
+    "title": "Quan hệ kế thừa (Generalization)",
+    "subtitle": "Gom nhóm Actor hoặc Use Case có chung bản chất.",
     "level": "Level3_AdvancedRelationships",
     "slug": "Lesson9_Include"
   },
   {
     "id": 10,
-    "title": "Lối rẽ tùy chọn (<<extend>>)",
-    "subtitle": "Mô phỏng kịch bản tùy chọn.",
+    "title": "Kỹ thuật trích xuất từ khóa",
+    "subtitle": "Phương pháp gạch chân: Danh từ -> Actor, Cụm động từ -> Use Case.",
     "level": "Level3_AdvancedRelationships",
     "slug": "Lesson10_Extend"
   },
   {
     "id": 11,
-    "title": "Cạm bẫy Include vs Extend",
-    "subtitle": "Trắc nghiệm phân loại tình huống.",
+    "title": "Mức độ chi tiết (Granularity - Khi nào gom, khi nào tách)",
+    "subtitle": "Quy tắc CRUD và phân quyền Actor.",
     "level": "Level3_AdvancedRelationships",
     "slug": "Lesson11_IncludeVsExtend"
   },
   {
     "id": 12,
-    "title": "Kế thừa (Generalization)",
-    "subtitle": "Sơ đồ phân cấp Actor.",
+    "title": "Các lỗi chết người (Anti-patterns)",
+    "subtitle": "Nhận diện và sửa các biểu đồ vẽ sai bét.",
     "level": "Level3_AdvancedRelationships",
     "slug": "Lesson12_Generalization"
   },
   {
     "id": 13,
-    "title": "Skill Check (Level 3 Review)",
-    "subtitle": "Bài kiểm tra hóc búa về mũi tên.",
+    "title": "Cấu trúc tài liệu Đặc tả Use Case",
+    "subtitle": "Template chuẩn, Tiền điều kiện & Hậu điều kiện.",
     "level": "Level3_AdvancedRelationships",
     "slug": "Lesson13_SkillCheck"
   },
   {
     "id": 14,
-    "title": "Bẫy \"CRUD\"",
-    "subtitle": "Tối giản hóa sơ đồ, gộp Use Case quản lý.",
+    "title": "Tránh lỗi phân mảnh CRUD (CRUD Bomb)",
+    "subtitle": "Gom nhóm 4 hành động cơ bản để tối ưu hiển thị.",
     "level": "Level4_RefiningDiagram",
     "slug": "Lesson14_CRUDBomb"
   },
   {
     "id": 15,
-    "title": "Use Case \"mồ côi\" và Ranh giới lỏng lẻo",
-    "subtitle": "Giao diện gỡ lỗi.",
+    "title": "Tránh lỗi Use Case mồ côi (Orphan Use Cases)",
+    "subtitle": "Kết nối Use Case vô chủ với Actor phù hợp.",
     "level": "Level4_RefiningDiagram",
     "slug": "Lesson15_OrphanUseCases"
   },
   {
     "id": 16,
-    "title": "\"Mì Spaghetti\" (Tránh chồng chéo)",
-    "subtitle": "Sắp xếp lại đường nối không cắt nhau.",
+    "title": "Tránh lỗi chồng chéo (Spaghetti Diagram)",
+    "subtitle": "Bố trí lại biểu đồ để giảm bớt giao cắt.",
     "level": "Level4_RefiningDiagram",
     "slug": "Lesson16_SpaghettiDiagram"
   },
   {
     "id": 17,
-    "title": "Skill Check (Level 4 Review)",
-    "subtitle": "Chấm điểm sơ đồ vi phạm quy tắc.",
+    "title": "Case Study 1: Hệ thống nhỏ",
+    "subtitle": "Thực hành vẽ Máy ATM và App đặt đồ ăn.",
     "level": "Level4_RefiningDiagram",
     "slug": "Lesson17_SkillCheck"
   },
