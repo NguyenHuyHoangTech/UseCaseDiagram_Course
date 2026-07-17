@@ -12,15 +12,14 @@ import { LESSON_DATA as Lesson10Data } from './Level3_AdvancedRelationships/Less
 import { LESSON_DATA as Lesson11Data } from './Level3_AdvancedRelationships/Lesson11_IncludeVsExtend';
 import { LESSON_DATA as Lesson12Data } from './Level3_AdvancedRelationships/Lesson12_Generalization';
 import { LESSON_DATA as Lesson13Data } from './Level3_AdvancedRelationships/Lesson13_SkillCheck';
-import { LESSON_DATA as Lesson14Data } from './Level4_RefiningDiagram/Lesson14_CRUDBomb';
-import { LESSON_DATA as Lesson15Data } from './Level4_RefiningDiagram/Lesson15_OrphanUseCases';
-import { LESSON_DATA as Lesson16Data } from './Level4_RefiningDiagram/Lesson16_SpaghettiDiagram';
-import { LESSON_DATA as Lesson17Data } from './Level4_RefiningDiagram/Lesson17_SkillCheck';
-import { LESSON_DATA as Lesson18Data } from './Level5_RealWorldArchitectures/Lesson18_RoleBasedAccess';
-import { LESSON_DATA as Lesson19Data } from './Level5_RealWorldArchitectures/Lesson19_EdTechSystem';
-import { LESSON_DATA as Lesson20Data } from './Level5_RealWorldArchitectures/Lesson20_IoTSystem';
-import { LESSON_DATA as Lesson21Data } from './Level5_RealWorldArchitectures/Lesson21_Sandbox';
-import { LESSON_DATA as Lesson22Data } from './Level5_RealWorldArchitectures/Lesson22_FinalMastery';
+import { LESSON_DATA as Lesson14Data } from './Level4_RefiningDiagram/Lesson1_CRUDTrap';
+import { LESSON_DATA as Lesson15Data } from './Level4_RefiningDiagram/Lesson2_OrphanUseCases';
+import { LESSON_DATA as Lesson16Data } from './Level4_RefiningDiagram/Lesson3_SpaghettiDiagram';
+import { LESSON_DATA as Lesson17Data } from './Level4_RefiningDiagram/Lesson4_LevelReview';
+import { LESSON_DATA as Lesson18Data } from './Level5_RealWorldArchitectures/Lesson1_ParkingActors';
+import { LESSON_DATA as Lesson19Data } from './Level5_RealWorldArchitectures/Lesson2_ParkingUseCases';
+import { LESSON_DATA as Lesson20Data } from './Level5_RealWorldArchitectures/Lesson3_ParkingLogic';
+import { LESSON_DATA as Lesson21Data } from './Level5_RealWorldArchitectures/Lesson4_FinalSandbox';
 
 export const ALL_LESSONS: Record<string, any[]> = {
   "1": Lesson1Data,
@@ -44,7 +43,6 @@ export const ALL_LESSONS: Record<string, any[]> = {
   "19": Lesson19Data,
   "20": Lesson20Data,
   "21": Lesson21Data,
-  "22": Lesson22Data,
 };
 
 export const LESSON_METADATA = [
@@ -176,30 +174,23 @@ export const LESSON_METADATA = [
   },
   {
     "id": 19,
-    "title": "Ứng dụng thuật toán học tập (EdTech)",
-    "subtitle": "Hệ thống Flashcard SRS.",
+    "title": "Vắt kiệt Động từ",
+    "subtitle": "Trích xuất Core Use Case cho bãi gửi xe.",
     "level": "Level5_RealWorldArchitectures",
-    "slug": "Lesson19_EdTechSystem"
+    "slug": "Lesson2_ParkingUseCases"
   },
   {
     "id": 20,
-    "title": "Tương tác Phần cứng - Phần mềm (IoT Context)",
-    "subtitle": "Hệ thống hộp thuốc thông minh.",
+    "title": "Giải mã Ẩn ý",
+    "subtitle": "Xây dựng Logic Include/Extend.",
     "level": "Level5_RealWorldArchitectures",
-    "slug": "Lesson20_IoTSystem"
+    "slug": "Lesson3_ParkingLogic"
   },
   {
     "id": 21,
-    "title": "Sandbox tự do",
-    "subtitle": "Kéo thả xây dựng sơ đồ tự do.",
+    "title": "Chế tác Tối thượng",
+    "subtitle": "Bản vẽ hoàn chỉnh (Final Sandbox).",
     "level": "Level5_RealWorldArchitectures",
-    "slug": "Lesson21_Sandbox"
-  },
-  {
-    "id": 22,
-    "title": "Final Mastery (Level 5 Skill Check)",
-    "subtitle": "Bài thi lớn cuối khóa.",
-    "level": "Level5_RealWorldArchitectures",
-    "slug": "Lesson22_FinalMastery"
+    "slug": "Lesson4_FinalSandbox"
   }
 ];

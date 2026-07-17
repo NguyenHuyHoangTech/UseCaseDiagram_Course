@@ -1,6 +1,5 @@
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import Mascot from './Mascot';
-import { Link } from 'react-router-dom';
 
 interface LessonBottomBarProps {
   phase: 'learning' | 'lesson' | 'skill_check' | 'complete' | string;
@@ -85,11 +84,6 @@ export default function LessonBottomBar({
 
       {/* Right Side: Action Buttons */}
       <div className="flex items-center gap-3 pointer-events-auto z-50 mb-2 w-full justify-center">
-        {phase === 'complete' && (
-           <Link to="/" className="w-full max-w-sm flex items-center justify-center py-4 rounded-full font-black text-lg bg-white text-black hover:bg-neutral-200 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-             Continue
-           </Link>
-        )}
 
         {phase !== 'complete' && isTheory && (
           <button onClick={onNext} className="px-10 py-3.5 rounded-full font-black text-lg bg-[#EEE] text-black hover:bg-white active:scale-95 transition-all">

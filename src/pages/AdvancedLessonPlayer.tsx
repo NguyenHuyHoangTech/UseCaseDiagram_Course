@@ -184,8 +184,8 @@ export default function AdvancedLessonPlayer() {
   const renderInteraction = () => {
     const type = currentData.interactionType;
 
-    // 1. Selection Types (True/False, MCQ)
-    if (type === 'true_false' || type === 'mcq') {
+    // 1. Selection Types (True/False, MCQ, selection)
+    if (type === 'true_false' || type === 'mcq' || type === 'selection') {
       return (
         <div className="w-full flex flex-col gap-4 mt-6">
           {currentData.options.map(opt => {
@@ -503,9 +503,9 @@ export default function AdvancedLessonPlayer() {
       const isOverloaded = sliderVal > 80;
 
       return (
-        <div className="w-full mt-6 flex flex-col items-center gap-6 relative">
+        <div className="w-full mt-2 flex flex-col items-center gap-3 relative">
            
-           <div className="w-full h-[400px] border-2 border-neutral-800 rounded-3xl overflow-hidden shadow-2xl relative">
+           <div className="w-full h-[320px] border-2 border-neutral-800 rounded-3xl overflow-hidden shadow-2xl relative">
               {isOverloaded && <div className="absolute inset-0 bg-red-500/10 blur-3xl transition-opacity duration-1000 pointer-events-none z-10"></div>}
               <InteractiveMap 
                  key={`map_${stepIndex}_${mapResetKey}`}
@@ -520,7 +520,7 @@ export default function AdvancedLessonPlayer() {
            </div>
 
            {/* Server Load Indicator */}
-           <div className="w-full flex flex-col items-center gap-4 mt-2 max-w-md z-10 bg-[#1A1A1A] p-6 rounded-3xl border border-neutral-800 shadow-xl">
+           <div className="w-full flex flex-col items-center gap-3 mt-0 max-w-md z-10 bg-[#1A1A1A] p-5 rounded-3xl border border-neutral-800 shadow-xl">
               <div className="flex justify-between w-full text-sm font-black tracking-widest uppercase transition-colors">
                  <span className={isOverloaded ? "text-neutral-500" : "text-green-500"}>Normal</span>
                  <span className={isOverloaded ? 'text-red-500 animate-pulse' : 'text-neutral-400'}>{sliderVal}% Load</span>
@@ -701,6 +701,10 @@ export default function AdvancedLessonPlayer() {
            />
         </div>
       );
+    }
+
+    if (!type) {
+       return null;
     }
 
     // Fallback block mapping...

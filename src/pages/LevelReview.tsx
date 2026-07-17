@@ -85,6 +85,7 @@ export default function LevelReview() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalPage, setModalPage] = useState(0);
+  const [isQuitModalOpen, setIsQuitModalOpen] = useState(false);
 
   const currentQ = REVIEW_DATA[currentIndex];
   const progressPercent = (currentIndex / REVIEW_DATA.length) * 100;
@@ -288,9 +289,9 @@ export default function LevelReview() {
       {/* --- QUIZ HEADER --- */}
       {phase === 'quiz' && (
         <header className="flex items-center justify-between px-6 py-5 z-40 relative max-w-5xl mx-auto w-full">
-          <Link to="/" className="text-neutral-500 hover:text-white transition-colors">
+          <button onClick={() => setIsQuitModalOpen(true)} className="text-neutral-500 hover:text-white transition-colors">
             <X size={28} />
-          </Link>
+          </button>
 
           <div className="flex-1 mx-8 h-2.5 bg-neutral-800 rounded-full overflow-hidden">
             <div
@@ -486,6 +487,18 @@ export default function LevelReview() {
                 Continue
               </button>
             </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Quit Modal */}
+      {isQuitModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-[#1f1f1f] w-full max-w-[400px] rounded-[2rem] p-8 pb-6 flex flex-col items-center shadow-2xl animate-in zoom-in-95 duration-200 border border-neutral-800">
+             <h3 className="text-2xl font-black text-white tracking-wide mb-2">Bạn có chắc không?</h3>
+             <p className="text-neutral-300 font-medium text-center mb-8">Nếu thoát bây giờ, bạn sẽ mất toàn bộ quá trình học và XP của bài này.</p>
+             <button onClick={() => setIsQuitModalOpen(false)} className="w-full bg-[#E5E5E5] hover:bg-white text-black font-bold text-[17px] py-4 rounded-2xl mb-4 transition-colors shadow-[0_4px_0_#b3b3b3] active:translate-y-1 active:shadow-[0_0_0_#b3b3b3]">Tiếp tục học</button>
+             <Link to="/" className="text-[#ff5b5b] font-bold text-lg hover:text-red-400 transition-colors uppercase tracking-widest pt-2">Thoát</Link>
           </div>
         </div>
       )}

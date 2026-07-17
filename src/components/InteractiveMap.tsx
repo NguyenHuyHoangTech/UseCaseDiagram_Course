@@ -58,9 +58,10 @@ interface InteractiveMapProps {
   initialEdges: any[];
   onChange?: (nodes: any[], edges: any[]) => void;
   allowCreate?: boolean;
+  allowConnect?: boolean;
 }
 
-export default function InteractiveMap({ initialNodes, initialEdges, onChange, allowCreate = true }: InteractiveMapProps) {
+export default function InteractiveMap({ initialNodes, initialEdges, onChange, allowCreate = true, allowConnect = true }: InteractiveMapProps) {
   const [nodes, setNodes] = useState<any[]>(initialNodes);
   const [edges, setEdges] = useState<any[]>(initialEdges);
   const [isSimulating, setIsSimulating] = useState(false);
@@ -125,7 +126,7 @@ export default function InteractiveMap({ initialNodes, initialEdges, onChange, a
     const node = nodes.find(n => n.id === id);
     if (node?.type === 'boundary' && !resizingBoundaryId) return; 
     
-    if (!allowCreate && selectedNodeId && selectedNodeId !== id) {
+    if (allowConnect && !allowCreate && selectedNodeId && selectedNodeId !== id) {
       // Connect selectedNodeId to id
       const sNode = nodes.find(n => n.id === selectedNodeId);
       const tNode = node;
@@ -415,7 +416,7 @@ export default function InteractiveMap({ initialNodes, initialEdges, onChange, a
         )}
 
         {/* MAP CANVAS */}
-        <div className="flex-1 relative bg-[#09090b] overflow-hidden">
+        <div className="flex-1 relative bg-transparent overflow-hidden">
             
           {toast && (
             <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[200] bg-red-900 border-2 border-red-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce">

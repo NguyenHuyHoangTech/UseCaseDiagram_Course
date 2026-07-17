@@ -32,7 +32,7 @@ export default function Header() {
               </span>
               <div className="absolute top-16 left-0 w-48 bg-[#1A1A1A] border border-neutral-800 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity flex flex-col overflow-hidden z-50">
                 <Link to="/lesson/1" className="px-4 py-3 font-bold text-neutral-300 hover:bg-[#222] hover:text-white transition-colors">Lesson</Link>
-                <Link to="/advanced-lesson/3" className="px-4 py-3 font-bold text-neutral-300 hover:bg-[#222] hover:text-white transition-colors">Advanced Lesson</Link>
+                <Link to="/advanced-lesson/test" className="px-4 py-3 font-bold text-neutral-300 hover:bg-[#222] hover:text-white transition-colors">Advanced Lesson</Link>
                 <Link to="/review" className="px-4 py-3 font-bold text-neutral-300 hover:bg-[#222] hover:text-white transition-colors">Review</Link>
                 <Link to="/map" className="px-4 py-3 font-bold text-neutral-300 hover:bg-[#222] hover:text-white transition-colors">Test Map</Link>
                 <Link to="/playground" className="px-4 py-3 font-bold text-neutral-300 hover:bg-[#222] hover:text-white transition-colors">Playground</Link>

@@ -4,8 +4,29 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import Mascot from '../components/Mascot';
 import LessonBottomBar from '../components/LessonBottomBar';
 import BuildDiagramInteractive from '../components/interactive/BuildDiagram';
+import FinalSandbox from '../components/interactive/FinalSandbox';
 import HighlightDiagramInteractive from '../components/interactive/HighlightDiagram';
+import SliderReveal from '../components/interactive/SliderReveal';
+import DragToBins from '../components/interactive/DragToBins';
+import TextHighlight from '../components/interactive/TextHighlight';
+import BlockMapping from '../components/interactive/BlockMapping';
+import Ordering from '../components/interactive/Ordering';
+import ClickConnect from '../components/interactive/ClickConnect';
+import CutEdge from '../components/interactive/CutEdge';
+import CableSelect from '../components/interactive/CableSelect';
+import SliderExploratory from '../components/interactive/SliderExploratory';
+import EquationBuilder from '../components/interactive/EquationBuilder';
+import MapRunner from '../components/interactive/MapRunner';
+import SliderExtend from '../components/interactive/SliderExtend';
+import FlipEdge from '../components/interactive/FlipEdge';
+import TreeMapping from '../components/interactive/TreeMapping';
+import VisualSelectEdge from '../components/interactive/VisualSelectEdge';
+import CRUDSmash from '../components/interactive/CRUDSmash';
+import OrphanRunner from '../components/interactive/OrphanRunner';
 import { ALL_LESSONS } from '../data/lessons';
+import Leaderboard from './Leaderboard';
+
+
 const PodiumSVG = () => (
   <svg viewBox="0 0 200 100" className="w-64 h-32 absolute bottom-0 left-1/2 -translate-x-1/2">
     <ellipse cx="100" cy="50" rx="80" ry="25" fill="#EAB308" opacity="0.3" filter="blur(10px)" />
@@ -28,9 +49,11 @@ export default function LessonPlayer() {
   const [xpAddedAnim, setXpAddedAnim] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState(0);
   const [isStreakPopupOpen, setIsStreakPopupOpen] = useState(false);
+  const [isQuitModalOpen, setIsQuitModalOpen] = useState(false);
   
-  const [status, setStatus] = useState('idle'); 
+  const [status, setStatus] = useState<'idle' | 'ready' | 'correct' | 'incorrect' | 'skill_check_incorrect' | 'showing_answer'>('idle');
   const [selectedOption, setSelectedOption] = useState<any>(null);
+  const [initialXp] = useState(xp); // Using ref to prevent re-renders, or just useState 
   const [failedOptions, setFailedOptions] = useState<string[]>([]);
   const [hasViewedExplanation, setHasViewedExplanation] = useState(false);
   
@@ -62,6 +85,26 @@ export default function LessonPlayer() {
     if (status === 'idle' || status === 'ready' || status === 'incorrect') {
       setSelectedOption(option);
       setStatus('ready');
+    }
+  };
+
+
+  const handleComponentComplete = (result: any) => {
+    if (!result) {
+      setStatus('idle');
+      return;
+    }
+    
+    if (result.isCorrect) {
+      setStatus('correct');
+      if (status !== 'showing_answer') {
+        const added = phase === 'skill_check' ? 20 : 10;
+        setXp(prev => prev + added);
+        setXpAddedAnim(added);
+        setTimeout(() => setXpAddedAnim(null), 1000);
+      }
+    } else {
+      setStatus(phase === 'skill_check' ? 'skill_check_incorrect' : 'incorrect');
     }
   };
 
@@ -111,8 +154,22 @@ export default function LessonPlayer() {
 
     if (currentStep < LESSON_DATA.length - 1) {
       setCurrentStep(prev => prev + 1);
+      const nextStepIndex = currentStep + 1;
+      if (LESSON_DATA[nextStepIndex]?.type === 'skill_check') {
+         setPhase('skill_check');
+      }
     } else {
       setPhase('complete');
+      if (id) {
+        const numId = parseInt(id, 10);
+        if (!isNaN(numId)) {
+           const completed = JSON.parse(localStorage.getItem('completed_lessons') || '[]');
+           if (!completed.includes(numId)) {
+             completed.push(numId);
+             localStorage.setItem('completed_lessons', JSON.stringify(completed));
+           }
+        }
+      }
     }
   };
 
@@ -165,7 +222,7 @@ export default function LessonPlayer() {
       {/* --- TOP NAVIGATION BAR (NOW OUTSIDE FRAME) --- */}
       {(phase === 'learning' || phase === 'skill_check') && (
         <header className="flex items-center justify-center px-4 py-4 z-40 relative w-full shrink-0">
-          <Link to="/" className="absolute left-6 text-neutral-500 hover:text-white transition-colors"><X size={26} strokeWidth={3} /></Link>
+          <button onClick={() => setIsQuitModalOpen(true)} className="absolute left-6 text-neutral-500 hover:text-white transition-colors"><X size={26} strokeWidth={3} /></button>
           
           <div className="flex-1 mx-16 max-w-xl flex items-center h-3 bg-neutral-800 rounded-full overflow-hidden relative">
             <div className="absolute top-0 left-0 h-full bg-[#4ADE80] transition-all duration-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" style={{ width: `${progressPercent}%` }}></div>
@@ -208,6 +265,9 @@ export default function LessonPlayer() {
       )}
 
       {/* FRAME */}
+      {phase === 'leaderboard' ? (
+         <Leaderboard oldXp={initialXp} newXp={xp} onContinue={() => navigate('/')} />
+      ) : (
       <div className={`flex-1 overflow-hidden rounded-[2rem] border-2 flex flex-col relative transition-all duration-300 bg-[#0a0a0a] mx-2 md:mx-6 mt-2 md:mt-4 mb-4 md:mb-8
           ${(status === 'incorrect' || status === 'skill_check_incorrect') ? 'border-[#ca8a04] animate-[shakeScreen_0.4s_ease-in-out]' : ''}
           ${status === 'correct' ? 'border-[#4ADE80] shadow-[0_0_40px_rgba(74,222,128,0.15)]' : ''}
@@ -218,7 +278,9 @@ export default function LessonPlayer() {
       <main className="flex-1 flex flex-col relative overflow-y-auto w-full px-6 pt-10 md:pt-14 pb-32 z-10">
         <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col">
         
-        {phase === 'complete' && (
+
+
+      {phase === 'complete' && (
           <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-700 w-full max-w-lg mx-auto">
              <div className="relative w-64 h-64 flex items-center justify-center mb-4">
                 <div className="absolute -top-32 w-[200%] h-64 bg-gradient-to-b from-white/20 to-transparent blur-2xl clip-path-polygon-[20%_0,80%_0,100%_100%,0_100%]"></div>
@@ -411,6 +473,78 @@ export default function LessonPlayer() {
                  <HighlightDiagramInteractive data={currentData} status={status} onComplete={handleSelect} />
                )}
 
+               {currentData.interactionType === 'slider_reveal' && (
+                 <SliderReveal data={currentData} status={status} onComplete={handleSelect} />
+               )}
+
+               {currentData.interactionType === 'drag_to_bins' && (
+                  <DragToBins data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'text_highlight' && (
+                  <TextHighlight data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'block_mapping' && (
+                  <BlockMapping data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'ordering' && (
+                  <Ordering data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'click_connect' && (
+                  <ClickConnect data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'cut_edge' && (
+                  <CutEdge data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'cable_select' && (
+                  <CableSelect data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'slider_exploratory' && (
+                  <SliderExploratory data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'equation_builder' && (
+                  <EquationBuilder data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'map_runner' && (
+                  <MapRunner data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'final_sandbox' && (
+                  <FinalSandbox data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'slider_extend' && (
+                  <SliderExtend data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'flip_edge' && (
+                  <FlipEdge data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'tree_mapping' && (
+                  <TreeMapping data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'visual_select_edge' && (
+                  <VisualSelectEdge data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'crud_smash' && (
+                  <CRUDSmash data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
+               {currentData.interactionType === 'orphan_runner' && (
+                  <OrphanRunner data={currentData} status={status} onComplete={handleComponentComplete} />
+               )}
+
                {currentData.type === 'interactive' && status !== 'idle' && status !== 'correct' && status !== 'showing_answer' && (
                   <button onClick={handleTryAgain} className="absolute -bottom-6 right-0 flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors bg-[#0A0A0A] px-3 py-1 rounded-full border border-neutral-800">
                     <RotateCcw size={14} /> Start over
@@ -421,7 +555,8 @@ export default function LessonPlayer() {
         )}
         </div>
       </main>
-      </div> {/* End Frame */}
+      </div>
+      )}
 
       {/* --- BOTTOM CONTROLS & MASCOT --- */}
       <div className="absolute inset-0 pointer-events-none p-2 md:p-3 flex flex-col z-50">
@@ -495,7 +630,18 @@ export default function LessonPlayer() {
           </div>
         </div>
       )}
-      
+
+      {/* Quit Modal */}
+      {isQuitModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-[#1f1f1f] w-full max-w-[400px] rounded-[2rem] p-8 pb-6 flex flex-col items-center shadow-2xl animate-in zoom-in-95 duration-200 border border-neutral-800">
+             <h3 className="text-2xl font-black text-white tracking-wide mb-2">Bạn có chắc không?</h3>
+             <p className="text-neutral-300 font-medium text-center mb-8">Nếu thoát bây giờ, bạn sẽ mất toàn bộ quá trình học và XP của bài này.</p>
+             <button onClick={() => setIsQuitModalOpen(false)} className="w-full bg-[#E5E5E5] hover:bg-white text-black font-bold text-[17px] py-4 rounded-2xl mb-4 transition-colors shadow-[0_4px_0_#b3b3b3] active:translate-y-1 active:shadow-[0_0_0_#b3b3b3]">Tiếp tục học</button>
+             <Link to="/" className="text-[#ff5b5b] font-bold text-lg hover:text-red-400 transition-colors uppercase tracking-widest pt-2">Thoát</Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

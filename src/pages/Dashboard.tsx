@@ -57,13 +57,24 @@ LESSON_METADATA.forEach(lesson => {
 });
 const sortedLevelKeys = Object.keys(LEVEL_INFO);
 
-const ACTIVE_LESSON_ID = 3;
+const getCompletedLessons = () => {
+  try {
+    return JSON.parse(localStorage.getItem('completed_lessons') || '[]');
+  } catch {
+    return [];
+  }
+};
 
 export default function Dashboard() {
   const location = useLocation();
   const isHome = location.pathname === '/home';
   const [isMascotVisible, setIsMascotVisible] = useState(true);
   const [isSelectedNodeVisible, setIsSelectedNodeVisible] = useState(true);
+  
+  const completedLessons = getCompletedLessons();
+  const firstUncompleted = LESSON_METADATA.find(l => !completedLessons.includes(l.id))?.id || LESSON_METADATA[LESSON_METADATA.length - 1].id;
+  const ACTIVE_LESSON_ID = firstUncompleted;
+
   const [selectedLessonId, setSelectedLessonId] = useState(ACTIVE_LESSON_ID);
   
   const selectedLessonData = LESSON_METADATA.find(l => l.id === selectedLessonId);

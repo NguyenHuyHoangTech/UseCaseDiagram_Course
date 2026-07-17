@@ -1,153 +1,123 @@
 // Data for Thế giới trong và ngoài (System Boundary)
 export const LESSON_DATA = [
-  // Bước 1: Intro / True False -> Giữ nguyên để khởi động nhẹ
+  // Bước 1: Khởi động (Kích thích trực giác)
   {
     type: 'interactive',
     interactionType: 'selection',
-    title: 'Khởi động',
-    question: 'Theo bạn, ranh giới hệ thống (System Boundary) có nghĩa là gì?',
+    title: 'Giới hạn của Quyền lực',
+    subtitle: 'Màn hình Khởi động',
+    question: 'Tình huống: Bạn đang thiết kế một phần mềm Quản lý Nhà hàng. Bạn có thể viết code để phần mềm ép khách hàng phải bước vào quán ăn và gọi món. Đúng hay sai?',
     options: [
-      { id: 'opt1', label: 'Là bức tường vật lý bảo vệ máy chủ', isCorrect: false },
-      { id: 'opt2', label: 'Là đường phân chia giữa những gì hệ thống tự làm và những gì bên ngoài tác động vào', isCorrect: true },
-      { id: 'opt3', label: 'Là giới hạn dung lượng của cơ sở dữ liệu', isCorrect: false },
+      { id: 'opt_true', label: 'Đúng', isCorrect: false },
+      { id: 'opt_false', label: 'Sai', isCorrect: true },
     ],
     explanation: [
-      { text: "Ranh giới hệ thống giúp ta vạch rõ ranh giới: Cái gì ta xây dựng (bên trong) và Cái gì tương tác với ta (bên ngoài)." }
+      { text: "Chính xác! Bạn chỉ có thể lập trình phần mềm để 'nhận' order, chứ không thể lập trình hành vi của con người ở thế giới thực." },
+      { text: "Khoan đã, trừ khi bạn có siêu năng lực thao túng tâm lý, còn kỹ sư phần mềm thì không thể code ra con người đâu!" } // For incorrect
     ]
   },
   
-  // Bước 2: Tương tác lắp ráp 1 (Thay thế cho 3 bước Sorting cũ)
+  // Bước 2: Tương tác 1: Phân loại rạch ròi
   {
     type: 'interactive',
-    interactionType: 'build_diagram',
-    title: 'Thử thách: Lắp ráp ATM',
-    question: 'Hãy lắp ráp kiến trúc cho hệ thống Máy ATM bằng cách chạm vào các linh kiện bên dưới để phân loại chúng:',
-    systemName: 'Hệ thống Máy ATM',
-    hint: 'Bạn có chắc máy chủ ngân hàng là thứ nằm trong cái máy ATM không?',
-    items: [
-      { id: 'customer', label: 'Khách hàng rút tiền', correctZone: 'outside' },
-      { id: 'counter', label: 'Bộ đếm & nhả tiền', correctZone: 'inside' },
-      { id: 'server', label: 'Máy chủ Ngân hàng', correctZone: 'outside' },
-      { id: 'card_reader', label: 'Khe đọc thẻ', correctZone: 'inside' }
+    interactionType: 'drag_to_bins',
+    title: 'Trong hay Ngoài?',
+    question: 'Hãy kéo thả các thành phần của dự án Nhà hàng vào đúng vị trí của nó.',
+    bins: [
+      { id: 'inside', label: 'Phần mềm kiểm soát được (Bên Trong)' },
+      { id: 'outside', label: 'Không kiểm soát được (Bên Ngoài)' }
+    ],
+    options: [
+      { id: 'opt1', label: 'Lưu trữ hóa đơn', correctBin: 'inside' },
+      { id: 'opt2', label: 'Khách hàng đói bụng', correctBin: 'outside' },
+      { id: 'opt3', label: 'Thuật toán tính tổng tiền', correctBin: 'inside' },
+      { id: 'opt4', label: 'Hệ thống Ngân hàng Momo', correctBin: 'outside' }
     ],
     explanation: [
-      { text: "Khách hàng và Máy chủ Ngân hàng là những thực thể độc lập đứng bên ngoài, giao tiếp với máy ATM. Còn bộ đếm tiền và khe đọc thẻ là các bộ phận cấu thành nên chính máy ATM." }
+      { text: "Momo là hệ thống của công ty khác, bạn đâu có quyền sửa code của họ đúng không? Nó phải nằm bên ngoài! Khách hàng cũng vậy, họ là các Actor tương tác với phần mềm từ bên ngoài." }
     ]
   },
 
-  // Bước 3: Thẻ chốt kiến thức 1
+  // Bước 3: Tương tác 2: Dựng lên màng chắn
+  {
+    type: 'interactive',
+    interactionType: 'slider_reveal',
+    title: 'Vẽ đường Ranh giới',
+    question: 'Kéo thanh trượt từ trái sang phải để dựng lên bức tường bảo vệ phần mềm của bạn.',
+    systemName: 'System Boundary',
+    nodes: [
+      { id: 'n1', label: 'Tính tiền', isSystem: true, icon: '💵' },
+      { id: 'n2', label: 'In biên lai', isSystem: true, icon: '🖨️' },
+      { id: 'n3', label: 'Khách hàng', isSystem: false, icon: '👤' }
+    ],
+    explanation: [
+      { text: "Khung chữ nhật sáng lên chính là System Boundary! Nó bao bọc chặt lấy Tính tiền và In biên lai, đồng thời đẩy khối Khách hàng ra mép ngoài." }
+    ]
+  },
+
+  // Bước 4: Chốt Kiến Thức (Lý thuyết cô đọng)
   {
     type: 'info_tabs',
-    title: 'Chốt lại: System Boundary là gì?',
+    title: 'Ranh giới Hệ thống (System Boundary)',
     tabs: [
       {
         tabTitle: 'Định nghĩa',
-        content: 'System Boundary (Ranh giới hệ thống) giống như một cái hộp. Mọi phần mềm, tính năng mà bạn PHẢI lập trình sẽ nằm gọn trong chiếc hộp này.',
+        content: 'System Boundary là một chiếc hộp khái niệm, phân định rạch ròi trách nhiệm của đội ngũ phát triển. Mọi thứ nằm BÊN TRONG chiếc hộp là phần mềm bạn phải xây dựng. Mọi thứ nằm BÊN NGOÀI chiếc hộp (Con người, phần cứng, API bên thứ 3) là môi trường tương tác với phần mềm của bạn.',
         image: 'box'
-      },
-      {
-        tabTitle: 'Bên ngoài (Actor)',
-        content: 'Những người dùng, hoặc các hệ thống phần mềm khác tương tác với chiếc hộp của bạn sẽ nằm ở ngoài. Ta gọi chúng là Actor.',
-        image: 'actor'
-      },
-      {
-        tabTitle: 'Nguyên tắc vàng',
-        content: 'Đừng vẽ chi tiết những gì diễn ra BÊN NGOÀI hộp. UML Use Case chỉ quan tâm chiếc hộp của bạn làm được gì cho những người đứng ngoài.',
-        image: 'rule'
       }
     ]
   },
 
-  // Bước 4: Tương tác Highlight
+  // Bước 5: Tương tác 3: Áp dụng thực tế
   {
     type: 'interactive',
-    interactionType: 'highlight_diagram',
-    title: 'Tình huống thực tế',
-    question: 'Trên bản vẽ kiến trúc của "App Đặt Đồ Ăn" bên dưới, hãy CHẠM VÀO TẤT CẢ các thành phần đóng vai trò là Actor (Tác nhân bên ngoài):',
-    hint: 'Chỉ chọn những hệ thống hoặc con người nằm BÊN NGOÀI quyền kiểm soát của App. Google Maps có do bạn lập trình không?',
-    nodes: [
-      { id: 'app', label: 'App Đặt Đồ Ăn', isSystem: true, icon: '📱', isCorrect: false },
-      { id: 'driver', label: 'Tài xế', isSystem: false, icon: '🛵', isCorrect: true },
-      { id: 'google', label: 'Google Maps API', isSystem: false, icon: '🗺️', isCorrect: true },
-      { id: 'customer', label: 'Khách Hàng', isSystem: false, icon: '👤', isCorrect: true },
-      { id: 'restaurant', label: 'Nhà Hàng', isSystem: false, icon: '🏪', isCorrect: true }
-    ],
+    interactionType: 'text_highlight',
+    title: 'Tách bạch hệ thống',
+    question: 'Trong đoạn mô tả tính năng dưới đây, hãy chạm để highlight cụm từ mô tả một hệ thống BÊN NGOÀI ranh giới phần mềm của chúng ta.',
+    text: 'Khi người dùng ấn nút Đặt hàng, phần mềm của chúng ta sẽ lưu thông tin giỏ hàng, sau đó gửi dữ liệu sang [Cổng thanh toán VNPay] để xử lý, và cuối cùng hiển thị thông báo thành công.',
+    correctId: 'Cổng thanh toán VNPay',
     explanation: [
-      { text: "App Đặt Đồ Ăn là hệ thống trung tâm. Tài xế, Khách hàng, Nhà hàng đều là người dùng (User Actor). Còn Google Maps là một hệ thống bên ngoài cung cấp dịch vụ bản đồ (Secondary Actor). Tất cả chúng đều không nằm trong ranh giới hệ thống của bạn!" }
+      { text: "Chính xác! 'Cổng thanh toán VNPay' là một hệ thống bên thứ 3. Chúng ta chỉ gọi API của họ chứ không thể can thiệp vào code bên trong VNPay." }
     ]
   },
 
-  // Bước 5: Thẻ chốt kiến thức 2
-  {
-    type: 'info_tabs',
-    title: 'Mở rộng: Giới hạn hệ thống',
-    tabs: [
-      {
-        tabTitle: 'API & Dịch vụ ngoài',
-        content: 'Ngày nay các hệ thống hiếm khi đứng độc lập. Việc xác định cái gì là dịch vụ ngoài (Payment Gateway, SMS, Email) rất quan trọng để không ôm đồm việc.',
-        image: 'api'
-      },
-      {
-        tabTitle: 'Hậu quả nếu sai',
-        content: 'Nếu bạn gom cả Google Maps vào hệ thống của mình, sếp sẽ tưởng bạn dự định tự code lại... Google Maps. Ngân sách sẽ sai bét!',
-        image: 'budget'
-      }
-    ]
-  },
-
-  // Bước 6: Transition
+  // Bước 6: Skill Check Transition
   {
     type: 'skill_check_transition',
     title: 'Sẵn sàng cho bài kiểm tra cuối?',
-    subtitle: 'Vượt qua bài test này để thăng hạng và chứng minh bạn đã hoàn toàn làm chủ khái niệm Ranh giới hệ thống!'
+    subtitle: 'Vượt qua bài test 2 câu này để thăng hạng và chứng minh bạn đã hoàn toàn làm chủ khái niệm Ranh giới hệ thống!'
   },
 
-  // Bước 7: Skill check 1
+  // Bước 7: Bắt lỗi sơ đồ (Skill Check 1)
+  {
+    type: 'skill_check',
+    interactionType: 'highlight_diagram',
+    title: 'Bài Test Kỹ Năng 1: Bắt lỗi sơ đồ',
+    question: 'Một thực tập sinh đã vẽ sai Sơ đồ Ranh giới (Boundary) cho ứng dụng Đặt xe. Hãy chạm vào thành phần đang vi phạm quy tắc để ném nó ra ngoài!',
+    nodes: [
+      { id: 'system', label: 'App Đặt Xe', isSystem: true, icon: '📱', isCorrect: false },
+      { id: 'func1', label: 'Tìm tài xế', isSystem: false, icon: '🔍', isCorrect: false },
+      { id: 'func2', label: 'Tính cước phí', isSystem: false, icon: '💵', isCorrect: false },
+      { id: 'driver', label: 'Tài xế', isSystem: false, icon: '👤', isCorrect: true } // The one to throw out
+    ],
+    explanation: [
+      { text: "Tuyệt vời! Tài xế là con người (Actor), không thể nằm bên trong hộp ranh giới của ứng dụng phần mềm được!" }
+    ]
+  },
+
+  // Bước 8: MCQ (Skill Check 2)
   {
     type: 'skill_check',
     interactionType: 'selection',
-    title: 'Bài Test Kỹ Năng 1',
-    question: 'Khi vẽ biểu đồ Use Case, System Boundary được biểu diễn bằng hình gì?',
+    title: 'Bài Test Kỹ Năng 2: Bản chất Ranh giới',
+    question: 'Chức năng cốt lõi nhất của System Boundary (Ranh giới hệ thống) là gì?',
     options: [
-      { id: 'o1', label: 'Một hình tròn nét đứt', isCorrect: false },
-      { id: 'o2', label: 'Một hình chữ nhật bao quanh các Use Case', isCorrect: true },
-      { id: 'o3', label: 'Không cần vẽ, nó tự được ngầm hiểu', isCorrect: false }
+      { id: 'o1', label: 'A. Gom nhóm những người dùng (Khách hàng, Admin) lại với nhau cho gọn.', isCorrect: false },
+      { id: 'o2', label: 'B. Xác định dung lượng bộ nhớ mà phần mềm được phép sử dụng.', isCorrect: false },
+      { id: 'o3', label: 'C. Tách biệt rạch ròi trách nhiệm của phần mềm với môi trường bên ngoài.', isCorrect: true }
     ],
     explanation: [
-      { text: "System Boundary luôn được vẽ như một hình chữ nhật khổng lồ ôm trọn tất cả các tính năng (Use Case) bên trong nó." }
-    ]
-  },
-
-  // Bước 8: Skill check 2
-  {
-    type: 'skill_check',
-    interactionType: 'build_diagram',
-    title: 'Bài Test Kỹ Năng 2',
-    question: 'Hãy cấu hình cho "Hệ thống Quản lý Bãi đỗ xe tự động":',
-    systemName: 'Quản lý Bãi đỗ xe',
-    items: [
-      { id: 'camera', label: 'Camera nhận diện biển số', correctZone: 'outside' },
-      { id: 'db', label: 'Lưu trữ lịch sử xe ra vào', correctZone: 'inside' },
-      { id: 'barie', label: 'Thanh chắn Barie', correctZone: 'outside' }
-    ],
-    explanation: [
-      { text: "Camera và Barie là các thiết bị phần cứng (Hardware). Phần mềm của bạn chỉ gửi/nhận tín hiệu từ chúng, do đó chúng là các Actor bên ngoài." }
-    ]
-  },
-
-  // Bước 9: Skill check 3
-  {
-    type: 'skill_check',
-    interactionType: 'sorting',
-    title: 'Bài Test Cuối',
-    question: 'Đối với "Website mua vé xem phim":',
-    targetItem: 'Cổng thanh toán VNPay',
-    options: [
-      { id: 'in', label: 'Nằm TRONG hệ thống', isCorrect: false },
-      { id: 'out', label: 'Nằm NGOÀI hệ thống', isCorrect: true }
-    ],
-    explanation: [
-      { text: "VNPay là một hệ thống bên ngoài (Secondary Actor) mà website của bạn kết nối đến để nhờ xử lý thanh toán." }
+      { text: "Đúng vậy! Ranh giới hệ thống (System Boundary) giúp đội ngũ phát triển xác định rõ phần mềm của mình bắt đầu và kết thúc ở đâu, tách biệt trách nhiệm với các hệ thống/con người bên ngoài." }
     ]
   }
 ];
