@@ -279,7 +279,7 @@ export default function Dashboard() {
                          key={lesson.id} 
                          ref={setRefs}
                          onClick={() => setSelectedLessonId(lesson.id)}
-                         className="flex flex-col items-center relative transition-transform duration-500 cursor-pointer mb-8"
+                         className="flex flex-col items-center relative transition-transform duration-500 cursor-pointer mb-20"
                          style={{ transform: `translateX(${translateX}px)` }}
                        >
 
@@ -306,20 +306,20 @@ export default function Dashboard() {
 
                           {/* LOCKED NODE */}
                           {isLocked && (
-                            <div className="relative flex items-center justify-center opacity-60 z-10 group mt-2">
+                            <div className="relative flex items-center justify-center opacity-90 z-10 group mt-2">
                                {/* ROTATING GOLD RING */}
                                {isSelected && (
                                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
                                      <div className="w-[100px] h-[100px] rounded-full border-[3px] border-transparent border-t-yellow-400 border-r-yellow-500 animate-[spin_3s_linear_infinite] shadow-[0_0_15px_rgba(250,204,21,0.5)] transform scale-y-[0.57] opacity-90"></div>
                                   </div>
                                )}
-                               <div className="relative w-[80px] h-[48px] bg-gradient-to-b from-[#444] to-[#222] rounded-[50%] border-t-[2px] border-t-neutral-500 border-b-8 border-[#111] shadow-[0_10px_20px_rgba(0,0,0,0.8),_inset_0_-2px_10px_rgba(0,0,0,0.5)] flex items-center justify-center transform group-active:scale-95 transition-transform group-hover:brightness-110 z-10">
-                                  <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-neutral-600 to-neutral-800 border border-neutral-500 flex items-center justify-center shadow-inner">
-                                     <Lock size={14} className="text-neutral-400 drop-shadow-md" />
+                               <div className="relative w-[80px] h-[48px] bg-gradient-to-b from-[#555] to-[#333] rounded-[50%] border-t-[2px] border-t-neutral-400 border-b-8 border-[#222] shadow-[0_10px_20px_rgba(0,0,0,0.8),_inset_0_-2px_10px_rgba(0,0,0,0.5)] flex items-center justify-center transform group-active:scale-95 transition-transform group-hover:brightness-110 z-10">
+                                  <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-neutral-500 to-neutral-700 border border-neutral-400 flex items-center justify-center shadow-inner">
+                                     <Lock size={14} className="text-neutral-300 drop-shadow-md" />
                                   </div>
                                </div>
-                               <div className="absolute left-[110px] whitespace-nowrap opacity-50 group-hover:opacity-100 transition-opacity z-20">
-                                  <h3 className="font-bold text-neutral-500">{lesson.title}</h3>
+                               <div className="absolute left-[110px] whitespace-nowrap opacity-80 group-hover:opacity-100 transition-opacity z-20">
+                                  <h3 className="font-bold text-neutral-400">{lesson.title}</h3>
                                </div>
                             </div>
                           )}
@@ -385,7 +385,7 @@ export default function Dashboard() {
             <div className={`absolute -bottom-8 left-1/2 -translate-x-1/2 w-full h-16 ${isLockedSelection ? 'bg-white/10' : 'bg-yellow-500/30'} blur-2xl pointer-events-none`}></div>
             
             <h3 className="text-xl font-black text-white mb-6 text-center relative z-10">{selectedLessonData.title}</h3>
-            <Link to={`/lesson/${selectedLessonData.id}`} className={`w-full py-4 font-black text-xl rounded-full active:scale-95 transition-all flex items-center justify-center relative z-10 ${isLockedSelection ? 'bg-[#222] text-white hover:bg-[#333] border border-neutral-700' : 'bg-[#eab308] text-black hover:bg-yellow-400 shadow-[0_0_30px_rgba(234,179,8,0.4)]'}`}>
+            <Link to={selectedLessonData.slug.includes('SkillCheck') ? '/review' : `/lesson/${selectedLessonData.id}`} className={`w-full py-4 font-black text-xl rounded-full active:scale-95 transition-all flex items-center justify-center relative z-10 ${isLockedSelection ? 'bg-[#222] text-white hover:bg-[#333] border border-neutral-700' : 'bg-[#eab308] text-black hover:bg-yellow-400 shadow-[0_0_30px_rgba(234,179,8,0.4)]'}`}>
                {selectedLessonId === ACTIVE_LESSON_ID ? 'Start' : (selectedLessonId < ACTIVE_LESSON_ID ? 'Practice' : 'Jump')}
             </Link>
           </div>
