@@ -336,6 +336,7 @@ export default function LessonPlayer() {
             {currentData.question && <h1 className="text-2xl md:text-3xl font-bold mb-8 text-center text-white leading-tight px-4">{currentData.question}</h1>}
             {!currentData.question && currentData.title && <h1 className="text-2xl font-bold mb-8 text-center">{currentData.title}</h1>}
             {currentData.subtitle && <p className="text-neutral-400 text-center mb-8">{currentData.subtitle}</p>}
+            {currentData.description && <p className="text-neutral-300 text-center mb-8 text-lg max-w-2xl mx-auto leading-relaxed">{currentData.description}</p>}
             
             <div className="flex-1 flex flex-col items-center justify-center relative w-full mb-8">
                {currentData.type === 'theory' && currentData.image}
@@ -564,7 +565,7 @@ export default function LessonPlayer() {
             <LessonBottomBar
               phase={phase}
               status={status}
-              isTheory={currentData?.type === 'theory' || currentData?.type === 'info_tabs' || currentData?.type === 'skill_check_transition'}
+              isTheory={currentData?.type === 'theory' || currentData?.type === 'info_tabs' || currentData?.type === 'skill_check_transition' || currentData?.type === 'intro_anim'}
               hasExplanation={!!currentData?.explanation}
               hint={selectedOption?.hint}
               isModalOpen={isModalOpen}

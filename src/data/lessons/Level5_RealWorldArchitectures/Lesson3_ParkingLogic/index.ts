@@ -84,13 +84,14 @@ export const LESSON_DATA = [
     interactionType: 'equation_builder',
     title: 'Không thể chối từ',
     instruction: "Dựa vào câu: 'Mọi thông tin xe ra vào đều bắt buộc phải lưu trữ thông tin', hãy lắp ráp chuỗi logic UML đúng chuẩn.",
-    tokens: [
+    options: [
       { id: 'xt', label: 'Xác thực thẻ xe', type: 'variable' },
       { id: 'lt', label: 'Lưu trữ thông tin', type: 'variable' },
       { id: 'inc', label: '<<include>>', type: 'operator' },
       { id: 'ext', label: '<<extend>>', type: 'operator' }
     ],
-    expected: ['xt', 'inc', 'lt'],
+    correctOrder: ['xt', 'inc', 'lt'],
+    slots: 3,
     explanation: [
       { text: "Luôn nhớ: Include đi TỪ kẻ nhờ vả (Base Case) SANG kẻ phục vụ (Included Case)! Nó hoạt động y hệt việc Controller gọi một hàm Service." }
     ]
@@ -102,13 +103,14 @@ export const LESSON_DATA = [
     interactionType: 'equation_builder',
     title: 'Xử lý Ngoại lệ (Exception Handling)',
     instruction: "Dựa vào câu: 'Nếu thẻ hết hạn... hệ thống sẽ gửi cảnh báo', hãy lắp ráp luồng UML thể hiện sự mở rộng của chức năng Xác thực thẻ.",
-    tokens: [
+    options: [
       { id: 'xt', label: 'Xác thực thẻ xe', type: 'variable' },
       { id: 'cb', label: 'Gửi cảnh báo', type: 'variable' },
       { id: 'inc', label: '<<include>>', type: 'operator' },
       { id: 'ext', label: '<<extend>>', type: 'operator' }
     ],
-    expected: ['cb', 'ext', 'xt'],
+    correctOrder: ['cb', 'ext', 'xt'],
+    slots: 3,
     explanation: [
       { text: "Đỉnh cao! Mũi tên Extend phải đâm NGƯỢC LẠI vào Base Case. Tính năng phụ đang xin phép 'chèn' thêm hành vi của nó vào tính năng chính khi bắt được lỗi (catch Exception)!" }
     ]
@@ -200,8 +202,8 @@ Chức năng gốc không biết gì cả, chức năng rẽ nhánh tự động
       { id: 'db', label: '[ Database Server ]' } // decoy
     ],
     slots: [
-      { id: 'cudan', label: '[ Cư dân ]', isStatic: true },
-      { id: 'xt', label: '( Xác thực thẻ xe )', isStatic: true },
+      { id: 'cudan', label: 'Tác nhân', staticLabel: '[ Cư dân ]', isStatic: true, staticType: 'actor' },
+      { id: 'xt', label: 'Base Use Case', staticLabel: '( Xác thực thẻ xe )', isStatic: true, staticType: 'usecase' },
       { id: 's1', label: '[ Chỗ trống 1 ]' },
       { id: 's2', label: '[ Chỗ trống 2 ]' }
     ],
